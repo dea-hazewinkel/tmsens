@@ -14,6 +14,8 @@
 # and the observed and inferred treatment group SDs. Full sample SDs are calculated from the observed SDs,
 # dropout proportions and specified dropout spread, under the assumption of normality.
 
+#testing
+#testing
 
 TM_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
