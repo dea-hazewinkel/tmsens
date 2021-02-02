@@ -1,0 +1,420 @@
+# The TM_bias function calculates, for a given dataset with binary treatment variable GR,
+# the strong MNAR and location shift assumption biases, under assumption of normally distributed
+# outcomes. Trimming fraction (trF) and side of trimming (LOWer or HIGHer value trimming) are user
+# specified. The biases can be computed for any dropout spread, ranging, for each treatment group,
+# from the observed dropout proportion (e.g., 0.25), to dropout across the entirety of the distribution
+# (spread_TG/spread_CG=1). spread_TG indicates the dropout spread of the treatment group, spread_CG
+# of the comparator group. By default, the lowest  value in the treatment variable GR is defined
+# as the comparator group.
+# If a dropout spread is not specified, the worst-case scenario is assumed, in which dropout is located on
+# the side of the  distribution opposite from the one that is being trimmed. For example, for lower value
+# trimming, the worst-case scenario would involve lower value dropout in the TG group and higher value dropout
+# in the CG group, and vice versa. For both scenarios, the bias components and total bias are calculated.
+# The TM_bias function returns the bias components, the total bias, the TM estimate, the adjusted TM estimate,
+# and the observed and inferred treatment group SDs. Full sample SDs are calculated from the observed SDs,
+# dropout proportions and specified dropout spread, under the assumption of normality.
+
+
+TM_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
+
+  cl <- match.call()
+
+  vn <- all.vars(formula)
+
+  if(!(GR %in% vn)){stop("TR variable not in data")}
+  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
+  if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
+
+  TR <- as.factor(data[,GR])
+  CG <- sort(levels(TR))[1]
+  TG <- sort(levels(TR))[2]
+
+  data.CG <- data[which(data[,GR]==CG),]
+  data.TG <- data[which(data[,GR]==TG),]
+
+  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
+  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
+
+  if (spread_TG==1){
+    spread_TG <- 0.999
+  }
+  if (spread_CG==1){
+    spread_CG <- 0.999
+  }
+  if (spread_TG < TG.drop ){stop("Treatment Gr spread smaller than dropout proportion")}
+  if (spread_CG < CG.drop ){stop("Comparator Gr spread smaller than dropout proportion")}
+
+
+  drop <- max(CG.drop,TG.drop)
+
+  if(is.null(trF)){
+    trF <- drop
+    if(drop==0){
+      trF=0.5
+    }
+  } else {
+    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
+  }
+
+  rems.TG <- ceiling(nrow(data.TG)*trF)
+  rems.CG <- ceiling(nrow(data.CG)*trF)
+
+  if(side=="LOW"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-(1:rems.TG),]
+    data.CGtrim <- data.CG[-(1:rems.CG),]
+  }
+
+
+  if(side=="HIGH"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG):nrow(data.TG)),]
+    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG):nrow(data.CG)),]
+  }
+
+  data.trim <- rbind(data.TGtrim,data.CGtrim)
+  data.trim$TR <- as.factor(data.trim$TR)
+
+  TG_var <- var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
+  CG_var <- var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
+
+  lm.obj <- lm(formula,data.trim)
+  beta_t <- summary(lm.obj)$coefficients[paste(GR,TG,sep=""),1]
+  beta_t <- matrix(beta_t)
+  colnames(beta_t) <- ""; rownames(beta_t) <- ""
+
+  SD.func.extr <- function(spread, dr, obs.var){
+
+    c <- spread
+    fr1 <- (c-dr)/(1-dr)
+    fr2 <- (1-c)/(1-dr)
+
+    A <- (1- ((qnorm(c)*dnorm(qnorm(c)))/(c)) -
+            ((dnorm(qnorm(c))/(c)))^2)
+    B <- (1- ((-qnorm(c)*dnorm(qnorm(c)))/(1-c))-
+            ((-dnorm(qnorm(c))/(1-c)))^2)
+    C <- -(dnorm(qnorm(c)))/(c)
+    D <- (dnorm(qnorm(c)))/(1-c)
+
+    fsd <- function(sigf) {((fr1*A*sigf^2 + fr2*B*sigf^2 +
+                               fr1*fr2*(C*sigf-D*sigf)^2))-
+        obs.var}
+
+    fullSD <- uniroot(fsd, lower=0.1, upper=30)$root
+    return(fullSD)}
+
+
+  LSA.bias <- function(TRSD, PLSD, trF, side){
+    if (side=="HIGH"){
+      bias <- -(TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+        (1-trF)}
+    if(side=="LOW"){
+      bias <- (TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+        (1-trF)
+    }
+    return(bias)
+  }
+
+  bias.drop <- function(SD=1,DSP=0.9, plD=0.2, trimf=0.55,
+                        group="TG", side){
+
+    DS <- 1-DSP
+    calc.frac <- ((1-DS) * ((1-DS)-trimf) / ((1-DS)-plD))
+
+    if (DSP <= trimf){
+      calc.frac <- 0
+    }
+    calc.frac
+
+    b.prop <- 1-trimf
+    c.prop <- DS
+
+    bst.prop <- DS+calc.frac
+    a <- qnorm(DS+calc.frac,0,1)
+    b <- qnorm(DS,0,1)
+    a1 <- qnorm(1-trimf,0,1)
+
+    F1 <- (((1-trimf)-DS)/(1-trimf))
+
+    if(DSP<=trimf){
+      a <- qnorm(1-trimf,0,1)
+      b <- qnorm(0,0,1)
+      a1 <- qnorm(1-trimf,0,1)
+      F1 <- 1
+    }
+
+    elPL <- ((((dnorm(a1)-dnorm(b))/
+                 (pnorm(a1)-pnorm(b)))*-SD)-
+               ((dnorm(a)-dnorm(b))/
+                  (pnorm(a)-pnorm(b))*-SD)) *F1
+    elTR <- (((dnorm(a)-dnorm(b))/
+                (pnorm(a)-pnorm(b))*-SD) -
+               ((((dnorm(a1)-dnorm(b))/
+                    (pnorm(a1)-pnorm(b)))*-SD))) *F1
+
+    if(group=="TG"){
+      el <- elTR
+    } else { if (group=="CG"){
+      el <- elPL}
+    }
+
+    if(group!="CG" & group!="TG"){
+      el <- NA}
+
+    if(side=="HIGH"){
+      el <- el
+    }
+    if(side=="LOW"){
+      el <- -1*el
+    }
+
+    return(el)}
+
+
+
+  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+
+    TG_SD_inf <- SD.func.extr(spread=spread_TG, dr=TG.drop,
+                              obs.var=TG_var)
+    CG_SD_inf <- SD.func.extr(spread=spread_CG, dr=CG.drop,
+                              obs.var=CG_var)
+
+    LSA.bias.out <- LSA.bias(TG_SD_inf, CG_SD_inf, trF, side=side)
+
+    bias.drop.out.TG <- bias.drop(TG_SD_inf, spread_TG, TG.drop, trF, group="TG", side=side)
+    bias.drop.out.CG <- bias.drop(CG_SD_inf, spread_CG, CG.drop, trF, group="CG", side=side)
+
+    tot_bias <- LSA.bias.out + bias.drop.out.TG + bias.drop.out.CG
+
+    bias_adj_est <- beta_t - tot_bias
+
+    bias.tab <- matrix(c("LS", paste("Strong MNAR TG group (", paste(TG, ")", sep=""), sep=""),
+                         paste("Strong MNAR CG group (", paste(CG, ")", sep=""), sep=""),
+                         LSA.bias.out,bias.drop.out.TG,bias.drop.out.CG), ncol=2, nrow=3)
+    colnames(bias.tab) <- c("Bias type", "Bias")
+    rownames(bias.tab) <- c("","","")
+
+    tot_bias <- matrix(tot_bias)
+    colnames(tot_bias) <- ""; rownames(tot_bias) <- ""
+    bias_adj_est <- matrix(bias_adj_est)
+    colnames(bias_adj_est) <- ""; rownames(bias_adj_est) <- ""
+
+  } else {
+    bias.tab <- NULL
+    TG_SD_inf <- matrix(NA) ; rownames(TG_SD_inf) <- colnames(TG_SD_inf) <- ""
+    CG_SD_inf <- matrix(NA) ; rownames(CG_SD_inf) <- colnames(CG_SD_inf) <- ""
+    tot_bias <- matrix(NA)
+    colnames(tot_bias) <- ""; rownames(tot_bias) <- ""
+    bias_adj_est <- matrix(NA)
+    colnames(bias_adj_est) <- ""; rownames(bias_adj_est) <- ""
+  }
+
+
+  TG_SD_max <- SD.func.extr(spread=TG.drop, dr=TG.drop,
+                            obs.var=TG_var)
+  CG_SD_max <- SD.func.extr(spread=CG.drop, dr=CG.drop,
+                            obs.var=CG_var)
+
+  bias.max <- function(SD, dr, trF, viol.group, side){
+
+    if(side=="LOW" & viol.group=="CG"){
+      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+    if(side=="LOW" & viol.group=="TG"){
+      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+    if(side=="HIGH" & viol.group=="CG"){
+      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+    if(side=="HIGH" & viol.group=="TG"){
+      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+
+    return(bias)
+  }
+
+  bias.max.viol.CG <- bias.max(CG_SD_max,CG.drop,trF, "CG", side)
+  bias.max.viol.TG <- bias.max(TG_SD_max,TG.drop,trF, "TG", side)
+  bias.max.LS.comp <- LSA.bias(TG_SD_max, CG_SD_max, trF, side)
+
+
+  maximum_bias_CG <- matrix(c(bias.max.viol.CG,
+                              bias.max.LS.comp,
+                              (bias.max.viol.CG+bias.max.LS.comp),
+                              beta_t-(bias.max.viol.CG+bias.max.LS.comp),
+                              TG_SD_max, CG_SD_max), ncol=1)
+  colnames(maximum_bias_CG) <- ""
+  rownames(maximum_bias_CG) <- c("Strong MNAR bias", "LS bias", "Total bias", "Bias adjusted estimate",
+                                 paste("Inferred SD TG group (", paste(TG, ")", sep=""),  sep=""),
+                                 paste("Inferred SD CG group (", paste(CG, ")", sep=""),  sep=""))
+
+  maximum_bias_TG <- matrix(c(bias.max.viol.TG,
+                              bias.max.LS.comp,
+                              (bias.max.viol.TG+bias.max.LS.comp),
+                              beta_t-(bias.max.viol.TG+bias.max.LS.comp),
+                              TG_SD_max, CG_SD_max), ncol=1)
+  colnames(maximum_bias_TG) <- ""
+  rownames(maximum_bias_TG) <- c("Strong MNAR bias", "LS bias", "Total bias", "Bias adjusted estimate",
+                                 paste("Inferred SD TG group (", paste(TG, ")", sep=""),  sep=""),
+                                 paste("Inferred SD CG group (", paste(CG, ")", sep=""),  sep=""))
+
+
+
+
+  if(side=="LOW"){
+    trimside <- "lower"
+
+  }
+  if(side=="HIGH"){
+    trimside <- "higher"
+  }
+  names(trimside) <- "trimming side"
+
+  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+    analysis_details <- matrix(c(paste(paste(round(trF*100,1), "%", sep=""), "trimming,", sep=" "),
+                                 paste(paste("under assumption of", trimside, sep=" "), "value dropout,", sep=" "),
+                                 paste(paste("with", paste(round(spread_TG*100,1), "% dropout spread in the TG group (", sep=""), sep=" "),
+                                       paste(TG, "),", sep=""), sep=""),
+                                 paste(paste("and", paste(round(spread_CG*100,1), "% dropout spread in the CG group (", sep=""), sep=" "),
+                                       paste(CG, ")", sep=""), sep="")), ncol=1)
+    colnames(analysis_details) <- ""
+    rownames(analysis_details) <- c("","","","")
+  } else {
+    analysis_details <- matrix(c(paste(paste(paste(round(trF*100,1), "%", sep=""), "trimming,", sep=" "),
+                                       paste(paste("under assumption of", trimside, sep=" "), "value dropout", sep=" "),sep=" ")))
+    colnames(analysis_details) <- ""
+    rownames(analysis_details) <- ""
+  }
+
+
+  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+    infSDTG <- matrix(c(paste(paste(paste(paste("Inferred TG group (", paste(paste(TG, ")", sep=""),"full sample SD for", sep=" "), sep=" "),
+                                          paste(round(TG.drop*100,1), "%", sep=""), sep=" "),"dropout in the", sep=" "),
+                              paste(paste(trimside, paste(round(spread_TG*100,1),"%", sep=""), sep=" "), "of the distribution", sep=" "), sep=" "),
+                        TG_SD_inf), ncol=1)
+    colnames(infSDTG) <- ""; rownames(infSDTG) <- c("","")
+
+    infSDCG <- matrix(c(paste(paste(paste(paste("Inferred CG group (", paste(paste(CG, ")", sep=""),"full sample SD for", sep=" "), sep=" "),
+                                          paste(round(CG.drop*100,1), "%", sep=""), sep=" "),"dropout in the", sep=" "),
+                              paste(paste(trimside, paste(round(spread_CG*100,1),"%", sep=""), sep=" "), "of the distribution", sep=" "), sep=" "),
+                        CG_SD_inf), ncol=1)
+    colnames(infSDCG) <- ""; rownames(infSDCG) <- c("","")
+  } else {
+    infSDTG <- infSDCG <- NA
+  }
+
+  obsSDTG <- matrix(c(paste(paste(paste("Observed TG group (", paste(paste(TG, ")", sep=""),"SD for", sep=" "), sep=" "),
+                                  paste(round(TG.drop*100,1), "%", sep=""), sep=" "),"dropout", sep=" "),
+                      sqrt(TG_var)), ncol=1)
+  colnames(obsSDTG) <- ""; rownames(obsSDTG) <- c("","")
+
+  obsSDCG <- matrix(c(paste(paste(paste("Observed CG group (", paste(paste(CG, ")", sep=""),"SD for", sep=" "), sep=" "),
+                                  paste(round(CG.drop*100,1), "%", sep=""), sep=" "),"dropout", sep=" "),
+                      sqrt(CG_var)), ncol=1)
+  colnames(obsSDCG) <- ""; rownames(obsSDCG) <- c("","")
+
+
+  detailss <- t(matrix(c("Treatment group:", TG,
+                         "Comparator group:", CG, spread_TG, spread_CG), nrow=2))
+  colnames(detailss) <- c("",""); rownames(detailss) <- c("","","")
+
+  out_fin <- list()
+  out_fin$call <- cl
+  out_fin$details <- detailss
+  out_fin$bias_components <- bias.tab
+  out_fin$total_bias <- tot_bias
+  out_fin$TM_estimate <- beta_t
+  out_fin$bias_adj_TM_estimate <- bias_adj_est
+  out_fin$analysis_details <- analysis_details
+  out_fin$observed_TG_SD <- obsSDTG
+  out_fin$observed_CG_SD <- obsSDCG
+  out_fin$inferred_TG_SD <- infSDTG
+  out_fin$inferred_CG_SD <- infSDCG
+  out_fin$max_bias_CG <- maximum_bias_CG
+  out_fin$max_bias_TG <- maximum_bias_TG
+
+
+  class(out_fin) <- "TM_bias"
+
+  return(out_fin)
+
+}
+
+
+print.TM_bias <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
+{
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
+      "\n\n", sep = "")
+
+  cat("Analysis details:\n")
+  print.default(x$analysis_details, quote=FALSE)
+
+  cat("\n")
+
+  if (length(x$bias_components)) {
+    cat("Bias components:\n")
+    x$bias_components[,2] <- format(as.numeric(x$bias_components[,2]), digits=digits)
+    print.default(x$bias_components, print.gap = 2L,
+                  quote = FALSE)
+  }
+  else cat("No bias components: dropout spread has not been specified and only the maximum bias has been computed \n")
+  cat("\n")
+
+  cat("Total bias:\n")
+  print.default(format(x$total_bias, digits=digits), quote=FALSE)
+
+  cat("\n")
+
+  cat("TM estimate:\n")
+  print.default(format(x$TM_estimate, digits=digits), quote=FALSE)
+
+  cat("\n")
+
+  cat("Bias adjusted TM estimate:\n")
+  print.default(format(x$bias_adj_TM_estimate, digits=digits), quote=FALSE)
+
+  cat("\n")
+
+  cat("Observed SDs:\n")
+
+  x$observed_TG_SD[2,] <- format(as.numeric(x$observed_TG_SD[2,]), digits=digits)
+  print.default(x$observed_TG_SD, quote=FALSE)
+  x$observed_CG_SD[2,] <- format(as.numeric(x$observed_CG_SD[2,]), digits=digits)
+  print.default(format(x$observed_CG_SD, digits=digits), quote=FALSE)
+
+  cat("\n")
+
+  cat("Inferred SDs:\n")
+  if(!(is.null(dim(x$inferred_TG_SD)))){
+    x$inferred_TG_SD[2,] <- format(as.numeric(x$inferred_TG_SD[2,]), digits=digits)
+    print.default(format(x$inferred_TG_SD, digits=digits), quote=FALSE)
+  } else {
+    print.default(x$inferred_TG_SD, quote=FALSE)
+  }
+  if(!(is.null(dim(x$inferred_CG_SD)))){
+    x$inferred_CG_SD[2,] <- format(as.numeric(x$inferred_CG_SD[2,]), digits=digits)
+    print.default(format(x$inferred_CG_SD, digits=digits), quote=FALSE)
+  } else {
+    print.default(x$inferred_CG_SD, quote=FALSE)
+  }
+
+  cat("\n")
+
+  max.bias.CG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the CG group (",
+                             paste(x$details[2,2],")",sep=""), sep="")
+  cat(max.bias.CG.title)
+  print.default(format(x$max_bias_CG, digits=digits), quote=FALSE)
+
+  cat("\n")
+
+  max.bias.TG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the TG group (",
+                             paste(x$details[1,2],")",sep=""), sep="")
+  cat(max.bias.TG.title)
+  print.default(format(x$max_bias_TG, digits=digits), quote=FALSE)
+
+  invisible(x)
+}
+
+
