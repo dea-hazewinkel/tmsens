@@ -8,11 +8,78 @@
 # - n_perm is the number of permutation to obtain p value/ 95% CI. Default value is 1000
 # - The adjusted estimate can only be computed for 50% trimming. Default is no calculation of the adjusted
 # - estimate (adj_est=FALSE).
+# details. The trimmed means estimate is subject to two assumptions: the strong MNAR assumption
+# requires that all dropouts (unobserved outcome values) are located in the fraction of the distribution
+# that is trimmed away; the location shift assumption requires the group variances of the full sample
+# to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally distributed
+# outcomes.
 
 #'@import "stats"
 
 
-tmF <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
+#' @name tm
+#' @title Fitting Trimmed Mean Linear Models:
+#'
+#' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
+#' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
+#' regression is fitted using @seealso \code{\link{lm}}.
+#'
+#' @param formula an object of class "@seealso \code{\link{formula}}", specifying the model, of the form
+#' \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
+#' variables optional.
+#' @param GR a string denoting the name of the binary treatment variable. This function assumes the
+#' lowest value to be the comparator/reference group
+#' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
+#' for each treatment group. \code{trF} should be equal to or greater than the largest observed
+#' trimming proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
+#' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
+#' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
+#' for the estimates. Default is 1000.
+#' @param adj_est a logical scalar. If \code{TRUE} the adjusted trimmed means estimate is computed.
+#' @param data a data frame containing the variables in the model. \code{data} should contain at least the following:
+#' a numeric outcome variable and a binary treatment variable (numeric, character or factor).
+#'
+#' @section Details: The trimmed means estimate is subject to two assumptions: the strong MNAR assumption requires
+#' that all dropouts (unobserved outcome values) are located in the fraction of the distribution
+#' that is trimmed away; the location shift assumption requires the group variances of the full sample
+#' to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally
+#' distributed outcomes. The adjustment is performed on the group with the smallest dropout proportion.
+#'
+#' The p-value and 95% confidence intervals for the trimmed means estimate and the adjusted trimmed means
+#' estimate are obtained in a permutation approach.
+#'
+#' @return \code{tm} returns an object of @seealso \code{\link{class}} "\code{tm}".
+#' The function \code{summary} is used to obtain a summary of the results. The generic accessor function
+#' \code{coefficients} extracts the regression coefficients with corresponding p-values and 95% confidence intervals.
+#'
+#' An object of class "\code{tm}"is a list containing the following components:
+#' \item{call}{the matched call}
+#' \item{n}{the number of observations per treatment group}
+#' \item{dropout}{the proportion of dropout per treatment group}
+#' \item{trimfrac}{the proportion of data that was trimmed away per treatment group}
+#' \item{trimside}{specifies if lower or higher value trimming was performed}
+#' \item{n_after_trimming}{the number of observations per treatment group after trimming}
+#' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
+#' \item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
+#' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
+#'
+#' @examples
+#' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
+#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
+#' rbinom(1000,2,0.4), rnorm(1000,0,1)))
+#'
+#' colnames(test_dat) <- c("TR", "Y", "U", "U2")
+#'
+#' test_dat$Y[1:200] <- NA
+#'
+#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR="TR", trF=0.5,
+#' side="LOW", n_perm=1000, adj_est=TRUE, data=test_dat)
+#'
+#' print(tm_obj)
+#' summary(tm_obj)
+
+#' @export
+tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
 
@@ -125,11 +192,11 @@ tmF <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_es
     if (side=="HIGH"){
       x2 <- min(x1) + (abs((min(x1)+x1)))}
 
-    x3 <- c(x1,x2)
-    x3 <- x3 - mean(x3)
+    x3a <- c(x1,x2)
+    x3 <- x3a - mean(x3a)
     x4 <- x3/(sd(x3)/SD.oth)
     x4 <- x4 - mean(x4)
-    x5 <- x4 + mean(x3)
+    x5 <- x4 + mean(x3a)
     x6 <- x5[1:length(x1)]
     dat.resc[,vn[1]] <- x6
     dat.trim.resc <- rbind(dat.resc,dat.oth)
@@ -190,15 +257,15 @@ tmF <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_es
     final.out$coefficients <- perm.out
   }
   final.out$`Analysis_details` <- an.det
-  final.out$`SD outcome` <- sd_tab
+  final.out$`SD_outcome` <- sd_tab
 
-  class(final.out) <- "tmF"
+  class(final.out) <- "tm"
 
   return(final.out)}
 
 
-# print function (modelled after lm.print)
-print.tmF <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
+#'@export
+print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
@@ -215,12 +282,45 @@ print.tmF <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
   invisible(x)
 }
 
-# summary function (not sure?)
-summary.tmF <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
+
+#' @name summary.tm
+#' @title Summarizing Trimmed Means Linear Model fits:
+#'
+#' @description \code{summary} method for class "\code{tm}".
+#'
+#'
+#' @param object an object of class "\code{tm}"
+#' @param ... user specified arguments
+#'
+#' @return \code{summary.tm} returns an list of summary statistics of the fitted trimmed means linear
+#' model in \code{object}, with components
+#' \item{call}{the matched call}
+#' \item{n}{the number of observations per treatment group}
+#' \item{dropout}{the proportion of dropout per treatment group}
+#' \item{trimfrac}{the proportion of data that was trimmed away per treatment group}
+#' \item{trimside}{specifies if lower or higher value trimming was performed}
+#' \item{n_after_trimming}{the number of observations per treatment group after trimming}
+#' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
+#' \item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
+#' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
+#'
+#'@seealso
+#'@seealso \code{\link{tm}}, '@seealso \code{\link{summary}}. The function '@seealso \code{\link{coef}}
+#'extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
+#'
+#' @examples
+#' \dontrun{summary(object)
+#' coef(object)}
+
+#' @method summary tm
+#' @export
+summary.tm <- function (object, ...)
 {
-  ans <- x
-  class(ans) <- "summary.tmF"
+  ans <- object
+  class(ans) <- "summary.tm"
   return(ans)
 }
+
+
 
 
