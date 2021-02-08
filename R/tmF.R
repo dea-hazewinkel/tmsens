@@ -32,7 +32,7 @@
 #' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.
-#' @param adj_est a logical scalar. If \code{TRUE} the adjusted trimmed means estimate is computed.
+#' @param adj_est logical. If \code{TRUE} the adjusted trimmed means estimate is computed. The default is `FALSE`.
 #' @param data a data frame containing the variables in the model. \code{data} should contain at least the following:
 #' a numeric outcome variable and a binary treatment variable (numeric, character or factor).
 #'
