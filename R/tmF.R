@@ -22,9 +22,9 @@
 #'
 #' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
-#' regression is fitted using @seealso \code{\link{lm}}.
+#' regression is fitted using @seealso \code{\link[stats]{lm}}.
 #'
-#' @param formula an object of class "@seealso \code{\link{formula}}", specifying the model, of the form
+#' @param formula an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
 #' \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
 #' variables optional.
 #' @param GR a string denoting the name of the binary treatment variable. This function assumes the
@@ -48,7 +48,7 @@
 #' The p-value and 95% confidence intervals for the trimmed means estimate and the adjusted trimmed means
 #' estimate are obtained in a permutation approach.
 #'
-#' @return \code{tm} returns an object of @seealso \code{\link{class}} "\code{tm}".
+#' @return \code{tm} returns an object of @seealso \code{\link[base]{class}} "\code{tm}".
 #' The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 #' \code{coefficients} extracts the regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
@@ -304,8 +304,8 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
-#'@seealso
-#'@seealso \code{\link{tm}}, '@seealso \code{\link{summary}}. The function '@seealso \code{\link{coef}}
+#'
+#'@seealso \code{\link{tm}}, '@seealso \code{\link[base]{summary}}. The function '@seealso \code{\link[stats]{coef}}
 #'extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples

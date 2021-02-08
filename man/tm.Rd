@@ -15,7 +15,7 @@ tm(
 )
 }
 \arguments{
-\item{formula}{an object of class "@seealso \code{\link{formula}}", specifying the model, of the form
+\item{formula}{an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
 \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
 variables optional.}
 
@@ -37,7 +37,7 @@ for the estimates. Default is 1000.}
 a numeric outcome variable and a binary treatment variable (numeric, character or factor).}
 }
 \value{
-\code{tm} returns an object of @seealso \code{\link{class}} "\code{tm}".
+\code{tm} returns an object of @seealso \code{\link[base]{class}} "\code{tm}".
 The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 \code{coefficients} extracts the regression coefficients with corresponding p-values and 95\% confidence intervals.
 
@@ -55,7 +55,7 @@ An object of class "\code{tm}"is a list containing the following components:
 \description{
 \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
-regression is fitted using @seealso \code{\link{lm}}.
+regression is fitted using @seealso \code{\link[stats]{lm}}.
 }
 \section{Details}{
  The trimmed means estimate is subject to two assumptions: the strong MNAR assumption requires
