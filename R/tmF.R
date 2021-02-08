@@ -75,6 +75,7 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
+#' @importFrom stats coef dnorm lm pnorm qnorm rnorm sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
