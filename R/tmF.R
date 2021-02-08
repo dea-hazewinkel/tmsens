@@ -303,8 +303,8 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #'
-#'@seealso \code{\link{tm}}, '@seealso \code{\link[base]{summary}}. The function '@seealso \code{\link[stats]{coef}}
-#'extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
+#' @seealso [`tm`]. The function [`coef`]
+#' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
 #' \dontrun{summary(object)
