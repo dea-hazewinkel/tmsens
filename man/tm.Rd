@@ -15,7 +15,7 @@ tm(
 )
 }
 \arguments{
-\item{formula}{an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
+\item{formula}{an object of class \code{\link{formula}}, specifying the model, of the form
 \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
 variables optional.}
 
@@ -31,17 +31,17 @@ trimming proportion. If left unspecified, a default trimming fraction of 0.5 is 
 \item{n_perm}{the number of permutations performed to obtain the p-value and 95\% confidence intervals
 for the estimates. Default is 1000.}
 
-\item{adj_est}{a logical scalar. If \code{TRUE} the adjusted trimmed means estimate is computed.}
+\item{adj_est}{logical. If \code{TRUE} the adjusted trimmed means estimate is computed. The default is \code{FALSE}.}
 
 \item{data}{a data frame containing the variables in the model. \code{data} should contain at least the following:
 a numeric outcome variable and a binary treatment variable (numeric, character or factor).}
 }
 \value{
-\code{tm} returns an object of @seealso \code{\link[base]{class}} "\code{tm}".
+\code{tm} returns an object of class \code{tm}.
 The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 \code{coefficients} extracts the regression coefficients with corresponding p-values and 95\% confidence intervals.
 
-An object of class "\code{tm}"is a list containing the following components:
+An object of class "\code{tm}" is a list containing the following components:
 \item{call}{the matched call}
 \item{n}{the number of observations per treatment group}
 \item{dropout}{the proportion of dropout per treatment group}
@@ -55,7 +55,7 @@ An object of class "\code{tm}"is a list containing the following components:
 \description{
 \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
-regression is fitted using @seealso \code{\link[stats]{lm}}.
+regression is fitted using \code{\link{lm}}.
 }
 \section{Details}{
  The trimmed means estimate is subject to two assumptions: the strong MNAR assumption requires
