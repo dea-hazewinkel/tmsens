@@ -14,9 +14,6 @@
 # to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally distributed
 # outcomes.
 
-#'@import "stats"
-
-
 #' @name tm
 #' @title Fitting Trimmed Mean Linear Models:
 #'
