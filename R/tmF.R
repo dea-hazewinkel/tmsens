@@ -49,7 +49,7 @@
 #' The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 #' \code{coefficients} extracts the regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
-#' An object of class "\code{tm}"is a list containing the following components:
+#' An object of class "\code{tm}" is a list containing the following components:
 #' \item{call}{the matched call}
 #' \item{n}{the number of observations per treatment group}
 #' \item{dropout}{the proportion of dropout per treatment group}
