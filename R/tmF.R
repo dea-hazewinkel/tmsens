@@ -320,7 +320,3 @@ summary.tm <- function (object, ...)
   class(ans) <- "summary.tm"
   return(ans)
 }
-
-
-
-
