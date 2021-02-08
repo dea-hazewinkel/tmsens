@@ -32,8 +32,6 @@ model in \code{object}, with components
 coef(object)}
 }
 \seealso{
-
-
-\code{\link{tm}}, '@seealso \code{\link{summary}}. The function '@seealso \code{\link{coef}}
+\code{\link{tm}}, '@seealso \code{\link[base]{summary}}. The function '@seealso \code{\link[stats]{coef}}
 extracts the array of regression coefficients with corresponding p-values and 95\% confidence intervals.
 }
