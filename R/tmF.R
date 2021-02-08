@@ -19,7 +19,7 @@
 #'
 #' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
-#' regression is fitted using @seealso \code{\link[stats]{lm}}.
+#' regression is fitted using [`lm`].
 #'
 #' @param formula an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
 #' \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
