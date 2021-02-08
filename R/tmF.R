@@ -307,8 +307,10 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
-#' \dontrun{summary(object)
-#' coef(object)}
+#' \dontrun{
+#' summary(object)
+#' coef(object)
+#' }
 
 #' @method summary tm
 #' @export
