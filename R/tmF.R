@@ -21,7 +21,7 @@
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
 #' regression is fitted using [`lm`].
 #'
-#' @param formula an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
+#' @param formula an object of class [`formula`], specifying the model, of the form
 #' \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
 #' variables optional.
 #' @param GR a string denoting the name of the binary treatment variable. This function assumes the
