@@ -1,13 +1,15 @@
 Package: tmsens
-Title: What the Package Does (One Line, Title Case)
+Title: Sensitivty Analysis Using the Trimmed Mean Estimator
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Authors@R: c( 
+    person("Dea", "Hazelwinkel",
+      role = c("aut", "cre"),
+      email = "a.d.hazewinkel@bristol.ac.uk"),
+    person("Tom", "Palmer", 
+      email = "tom.palmer@bristol.ac.uk", 
+    role = c("aut"),
+    comment = c(ORCID = "0000-0003-4655-4511")))
+Description: Sensitivty analysis using the trimmed mean estimator.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
