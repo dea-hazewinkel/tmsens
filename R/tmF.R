@@ -45,7 +45,7 @@
 #' The p-value and 95% confidence intervals for the trimmed means estimate and the adjusted trimmed means
 #' estimate are obtained in a permutation approach.
 #'
-#' @return \code{tm} returns an object of @seealso \code{\link[base]{class}} "\code{tm}".
+#' @return \code{tm} returns an object of class `tm`.
 #' The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 #' \code{coefficients} extracts the regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
