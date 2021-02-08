@@ -262,6 +262,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
 
 #' @export
+#' @importFrom stats coef
 print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
