@@ -14,17 +14,14 @@
 # to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally distributed
 # outcomes.
 
-#'@import "stats"
-
-
 #' @name tm
 #' @title Fitting Trimmed Mean Linear Models:
 #'
 #' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
-#' regression is fitted using @seealso \code{\link[stats]{lm}}.
+#' regression is fitted using [`lm`].
 #'
-#' @param formula an object of class "@seealso \code{\link[stats]{formula}}", specifying the model, of the form
+#' @param formula an object of class [`formula`], specifying the model, of the form
 #' \code{outcome ~ terms}, where \code{terms} must include the binary treatment variable, with additional
 #' variables optional.
 #' @param GR a string denoting the name of the binary treatment variable. This function assumes the
@@ -35,7 +32,7 @@
 #' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.
-#' @param adj_est a logical scalar. If \code{TRUE} the adjusted trimmed means estimate is computed.
+#' @param adj_est logical. If \code{TRUE} the adjusted trimmed means estimate is computed. The default is `FALSE`.
 #' @param data a data frame containing the variables in the model. \code{data} should contain at least the following:
 #' a numeric outcome variable and a binary treatment variable (numeric, character or factor).
 #'
@@ -48,11 +45,11 @@
 #' The p-value and 95% confidence intervals for the trimmed means estimate and the adjusted trimmed means
 #' estimate are obtained in a permutation approach.
 #'
-#' @return \code{tm} returns an object of @seealso \code{\link[base]{class}} "\code{tm}".
+#' @return \code{tm} returns an object of class `tm`.
 #' The function \code{summary} is used to obtain a summary of the results. The generic accessor function
 #' \code{coefficients} extracts the regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
-#' An object of class "\code{tm}"is a list containing the following components:
+#' An object of class "\code{tm}" is a list containing the following components:
 #' \item{call}{the matched call}
 #' \item{n}{the number of observations per treatment group}
 #' \item{dropout}{the proportion of dropout per treatment group}
@@ -77,8 +74,8 @@
 #'
 #' print(tm_obj)
 #' summary(tm_obj)
-
 #' @export
+#' @importFrom stats coef dnorm lm pnorm qnorm rnorm sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
@@ -264,7 +261,8 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
   return(final.out)}
 
 
-#'@export
+#' @export
+#' @importFrom stats coef
 print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
@@ -301,16 +299,18 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{trimside}{specifies if lower or higher value trimming was performed}
 #' \item{n_after_trimming}{the number of observations per treatment group after trimming}
 #' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
-#' \item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
+#' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adjest=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #'
-#'@seealso \code{\link{tm}}, '@seealso \code{\link[base]{summary}}. The function '@seealso \code{\link[stats]{coef}}
-#'extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
+#' @seealso [`tm`]. The function [`coef`]
+#' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
-#' \dontrun{summary(object)
-#' coef(object)}
+#' \dontrun{
+#' summary(object)
+#' coef(object)
+#' }
 
 #' @method summary tm
 #' @export
@@ -320,7 +320,3 @@ summary.tm <- function (object, ...)
   class(ans) <- "summary.tm"
   return(ans)
 }
-
-
-
-

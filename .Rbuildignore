@@ -1,2 +1,2 @@
-^TM\.project\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
