@@ -28,7 +28,7 @@
 #' lowest value to be the comparator/reference group
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
-#' trimming proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
+#' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
 #' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.
@@ -307,10 +307,20 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
-#' \dontrun{
-#' summary(object)
-#' coef(object)
-#' }
+#' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
+#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
+#' rbinom(1000,2,0.4), rnorm(1000,0,1)))
+#'
+#' colnames(test_dat) <- c("TR", "Y", "U", "U2")
+#'
+#' test_dat$Y[1:200] <- NA
+#'
+#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR="TR", trF=0.5,
+#' side="LOW", n_perm=1000, adj_est=TRUE, data=test_dat)
+#'
+#' summary(tm_obj)
+#' coef(tm_obj)
+#'
 
 #' @method summary tm
 #' @export
