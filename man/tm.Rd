@@ -24,7 +24,7 @@ lowest value to be the comparator/reference group}
 
 \item{trF}{a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 for each treatment group. \code{trF} should be equal to or greater than the largest observed
-trimming proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
+dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
 
 \item{side}{specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.}
 
