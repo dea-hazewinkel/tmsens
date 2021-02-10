@@ -22,7 +22,7 @@ Authors@R: c(
       email = "j.bowden2@exeter.ac.uk", 
     role = c("aut"),
     comment = c(ORCID = "0000-0003-2628-3304"))
-)
+  )
 Description: Sensitivity analysis using the trimmed mean estimator.
 License: GPL-3
 Encoding: UTF-8
