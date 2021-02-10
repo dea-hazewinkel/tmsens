@@ -2,6 +2,6 @@
 
 To install the package run in R
 ```r
-# instal.packages("remotes")
+# install.packages("remotes") # uncomment if remotes not installed
 remotes::install_github("dea-hazewinkel/tmsens")
 ```
