@@ -33,3 +33,5 @@ Imports:
     stats
 URL: https://github.com/dea-hazelwinkel/tmsens 
 BugReports: https://github.com/dea-hazelwinkel/tmsens/issues
+Suggests: 
+    testthat
