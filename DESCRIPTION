@@ -31,3 +31,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
     stats
+URL: https://github.com/dea-hazelwinkel/tmsens 
+BugReports: https://github.com/dea-hazelwinkel/tmsens/issues
