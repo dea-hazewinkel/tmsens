@@ -105,7 +105,7 @@
 #'
 #' tm_bias_obj <- tm_bias(formula= Y ~ TR, "TR", trF=0.5,
 #'                        side="LOW", spread_TG=0.4,
-#'                        spread_CG=0.3, data=test_dat)
+#'                        spread_CG=0.6, data=test_dat)
 #'
 #' print(tm_bias_obj)
 #'
@@ -367,6 +367,14 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     trimside <- "higher"
   }
   names(trimside) <- "trimming side"
+
+  if(spread_CG==0.999){
+    spread_CG <- 1
+  }
+
+  if(spread_TG==0.999){
+    spread_TG <- 1
+  }
 
   if(is.numeric(spread_CG) & is.numeric(spread_TG)){
     analysis_details <- matrix(c(paste(paste(round(trF*100,1), "%", sep=""), "trimming,", sep=" "),
