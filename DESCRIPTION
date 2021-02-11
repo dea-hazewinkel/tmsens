@@ -1,5 +1,5 @@
 Package: tmsens
-Title: Sensitivity Analysis Using the Trimmed Mean Estimator
+Title: Sensitivity Analysis Using the Trimmed Means Estimator
 Version: 0.0.0.9000
 Authors@R: c( 
     person("Audinga-Dea", "Hazewinkel",
@@ -23,7 +23,7 @@ Authors@R: c(
     role = c("aut"),
     comment = c(ORCID = "0000-0003-2628-3304"))
   )
-Description: Sensitivity analysis using the trimmed mean estimator.
+Description: Sensitivity analysis using the trimmed means estimator.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
