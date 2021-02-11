@@ -368,6 +368,14 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   }
   names(trimside) <- "trimming side"
 
+  if(spread_CG==0.999){
+    spread_CG <- 1
+  }
+
+  if(spread_TG==0.999){
+    spread_TG <- 1
+  }
+
   if(is.numeric(spread_CG) & is.numeric(spread_TG)){
     analysis_details <- matrix(c(paste(paste(round(trF*100,1), "%", sep=""), "trimming,", sep=" "),
                                  paste(paste("under assumption of", trimside, sep=" "), "value dropout,", sep=" "),
