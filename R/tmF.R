@@ -61,17 +61,15 @@
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #' @examples
-#' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
-#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
-#' rbinom(1000,2,0.4), rnorm(1000,0,1)))
-#'
+#' set.seed(123456)
+#' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
+#'                           c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5))),
+#'                           rbinom(1000, 2, 0.4), rnorm(1000, 0, 1)))
 #' colnames(test_dat) <- c("TR", "Y", "U", "U2")
-#'
 #' test_dat$Y[1:200] <- NA
-#'
-#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR="TR", trF=0.5,
-#' side="LOW", n_perm=1000, adj_est=TRUE, data=test_dat)
-#'
+#' tm_obj <- tm(formula= Y ~ TR + U + U2,
+#'              GR = "TR", trF = 0.5, side = "LOW",
+#'              n_perm = 1000, adj_est = TRUE, data = test_dat)
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
@@ -262,21 +260,20 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
 
 #' @export
-#' @importFrom stats coef
+#' @importFrom stats coef printCoefmat
 print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
-  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
+  cat("\nCall:\n",
+      paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
+
   if (length(coef(x))) {
     cat("Coefficients:\n")
-    print.default(format(coef(x)[,1], digits = digits), print.gap = 2L,
-                  quote = FALSE)
+    coefs <- x$coefficients
+    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
   }
   else cat("No coefficients\n")
   cat("\n")
-
-  cat(paste(paste(round(x$trimfrac*100,1), "%", sep=""), x$trimside, sep=" "))
-
   invisible(x)
 }
 
@@ -285,7 +282,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' @title Summarizing Trimmed Means Linear Model fits:
 #'
 #' @description \code{summary} method for class "\code{tm}".
-#'
 #'
 #' @param object an object of class "\code{tm}"
 #' @param ... user specified arguments
@@ -302,31 +298,58 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adjest=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
-#'
 #' @seealso [`tm`]. The function [`coef`]
 #' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
+#' set.seed(123456)
 #' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
-#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
-#' rbinom(1000,2,0.4), rnorm(1000,0,1)))
-#'
+#'                           c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
+#'                           rbinom(1000,2,0.4), rnorm(1000,0,1)))
 #' colnames(test_dat) <- c("TR", "Y", "U", "U2")
-#'
 #' test_dat$Y[1:200] <- NA
-#'
-#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR="TR", trF=0.5,
-#' side="LOW", n_perm=1000, adj_est=TRUE, data=test_dat)
-#'
+#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR = "TR", trF = 0.5,
+#'              side = "LOW", n_perm = 1000, adj_est = TRUE, data = test_dat)
 #' summary(tm_obj)
 #' coef(tm_obj)
 #'
-
-#' @method summary tm
 #' @export
 summary.tm <- function (object, ...)
 {
   ans <- object
   class(ans) <- "summary.tm"
-  return(ans)
+  ans
+}
+
+#' @importFrom stats coef printCoefmat
+#' @export
+print.summary.tm <- function (x,
+                              digits = max(3L, getOption("digits") - 3L),
+                              ...)
+{
+  cat("\nCall:\n",
+      paste(deparse(x$call), sep = "\n", collapse = "\n"),
+      "\n\n", sep = "")
+
+  cat("\nAnalysis details:\n")
+  cat(x$`Analysis_details`[2], "\n\n", sep = "")
+
+  if (length(coef(x))) {
+    cat("Coefficients:\n")
+    coefs <- x$coefficients
+    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+  }
+  else cat("No coefficients\n")
+
+  cat("\n\nDropout:\n")
+  cat(format(x$dropout[[2]] * 100, digits = digits), "%", sep="")
+
+  cat("\n\nSample size after trimming:\n")
+  cat(format(x$n_after_trimming[[1]], digits = digits))
+
+  cat("\n\nTrimming fraction: \n",
+      format(x$trimfrac*100, digits = digits),
+      "% ", x$trimside, "\n\n", sep = "")
+
+  invisible(x)
 }
