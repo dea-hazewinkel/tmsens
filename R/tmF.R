@@ -318,5 +318,5 @@ summary.tm <- function (object, ...)
 {
   ans <- object
   class(ans) <- "summary.tm"
-  return(ans)
+  ans
 }
