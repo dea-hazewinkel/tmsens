@@ -313,8 +313,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' summary(tm_obj)
 #' coef(tm_obj)
 #'
-
-#' @method summary tm
 #' @export
 summary.tm <- function (object, ...)
 {
