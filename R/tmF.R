@@ -61,11 +61,10 @@
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #' @examples
-#' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
-#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
-#' rbinom(1000,2,0.4), rnorm(1000,0,1)))
-#'
 #' set.seed(123456)
+#' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
+#'                           c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5))),
+#'                           rbinom(1000, 2, 0.4), rnorm(1000, 0, 1)))
 #' colnames(test_dat) <- c("TR", "Y", "U", "U2")
 #'
 #' test_dat$Y[1:200] <- NA
