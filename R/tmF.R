@@ -65,6 +65,7 @@
 #' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
 #' rbinom(1000,2,0.4), rnorm(1000,0,1)))
 #'
+#' set.seed(123456)
 #' colnames(test_dat) <- c("TR", "Y", "U", "U2")
 #'
 #' test_dat$Y[1:200] <- NA
