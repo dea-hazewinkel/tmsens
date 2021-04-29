@@ -274,9 +274,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
   }
   else cat("No coefficients\n")
   cat("\n")
-
-  cat(paste(paste(round(x$trimfrac*100,1), "%", sep=""), x$trimside, sep=" "))
-
   invisible(x)
 }
 
