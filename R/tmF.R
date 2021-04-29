@@ -66,12 +66,10 @@
 #'                           c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5))),
 #'                           rbinom(1000, 2, 0.4), rnorm(1000, 0, 1)))
 #' colnames(test_dat) <- c("TR", "Y", "U", "U2")
-#'
 #' test_dat$Y[1:200] <- NA
-#'
-#' tm_obj <- tm(formula= Y ~ TR + U + U2, GR="TR", trF=0.5,
-#' side="LOW", n_perm=1000, adj_est=TRUE, data=test_dat)
-#'
+#' tm_obj <- tm(formula= Y ~ TR + U + U2,
+#'              GR = "TR", trF = 0.5, side = "LOW",
+#'              n_perm = 1000, adj_est = TRUE, data = test_dat)
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
