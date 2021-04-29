@@ -320,3 +320,36 @@ summary.tm <- function (object, ...)
   class(ans) <- "summary.tm"
   ans
 }
+
+#' @importFrom stats coef printCoefmat
+#' @export
+print.summary.tm <- function (x,
+                              digits = max(3L, getOption("digits") - 3L),
+                              ...)
+{
+  cat("\nCall:\n",
+      paste(deparse(x$call), sep = "\n", collapse = "\n"),
+      "\n\n", sep = "")
+
+  cat("\nAnalysis details:\n")
+  cat(x$`Analysis_details`[2], "\n\n", sep = "")
+
+  if (length(coef(x))) {
+    cat("Coefficients:\n")
+    coefs <- x$coefficients
+    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+  }
+  else cat("No coefficients\n")
+
+  cat("\n\nDropout:\n")
+  cat(format(x$dropout[[2]] * 100, digits = digits), "%", sep="")
+
+  cat("\n\nSample size after trimming:\n")
+  cat(format(x$n_after_trimming[[1]], digits = digits))
+
+  cat("\n\nTrimming fraction: \n",
+      format(x$trimfrac*100, digits = digits),
+      "% ", x$trimside, "\n\n", sep = "")
+
+  invisible(x)
+}
