@@ -302,6 +302,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
 #'
 #' @examples
+#' set.seed(123456)
 #' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
 #' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5))),
 #' rbinom(1000,2,0.4), rnorm(1000,0,1)))
