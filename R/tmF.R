@@ -283,7 +283,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #'
 #' @description \code{summary} method for class "\code{tm}".
 #'
-#'
 #' @param object an object of class "\code{tm}"
 #' @param ... user specified arguments
 #'
@@ -298,7 +297,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
 #' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adjest=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
-#'
 #'
 #' @seealso [`tm`]. The function [`coef`]
 #' extracts the array of regression coefficients with corresponding p-values and 95% confidence intervals.
