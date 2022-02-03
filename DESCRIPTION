@@ -28,10 +28,10 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1.2
+RoxygenNote: 7.1.2
 Imports: 
     stats
-URL: https://github.com/dea-hazelwinkel/tmsens 
-BugReports: https://github.com/dea-hazelwinkel/tmsens/issues
+URL: https://github.com/dea-hazewinkel/tmsens 
+BugReports: https://github.com/dea-hazewinkel/tmsens/issues
 Suggests: 
     testthat
