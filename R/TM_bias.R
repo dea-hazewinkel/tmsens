@@ -14,12 +14,6 @@
 # and the observed and inferred treatment group SDs. Full sample SDs are calculated from the observed SDs,
 # dropout proportions and specified dropout spread, under the assumption of normality.
 
-#testing
-#testing
-
-#testing again
-
-
 #' @name tm_bias
 #' @title Calculating Bias For Trimmed Mean Linear Models:
 #'
@@ -36,7 +30,7 @@
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
 #' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
-#' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
+#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed.
 #' @param spread_TG a number between 0 and 1, specifying the dropout spread for the treatment group.
 #' \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
 #' the worst-case scenario is assumed, in which dropout is located on the side of the distribution opposite from the one
@@ -94,18 +88,18 @@
 #' side of the distribution from the one that is being trimmed}
 #'
 #' @examples
-#' test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
-#' c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5)))))
+#' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
+#'   c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
 #'
 #' colnames(test_dat) <- c("TR", "Y")
 #'
-#' test_dat$Y[which(test_dat$TR==0)[1:150]] <- NA
-#' test_dat$Y[which(test_dat$TR==1)[sample(seq(1,400),
-#'             200, replace=FALSE)]] <- NA
+#' test_dat$Y[which(test_dat$TR == 0)[1:150]] <- NA
+#' test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400),
+#'             200, replace = FALSE)]] <- NA
 #'
-#' tm_bias_obj <- tm_bias(formula= Y ~ TR, "TR", trF=0.5,
-#'                        side="LOW", spread_TG=0.4,
-#'                        spread_CG=0.6, data=test_dat)
+#' tm_bias_obj <- tm_bias(formula = Y ~ TR, "TR", trF = 0.5,
+#'                        side = "LOW", spread_TG = 0.4,
+#'                        spread_CG = 0.6, data = test_dat)
 #'
 #' print(tm_bias_obj)
 #'
