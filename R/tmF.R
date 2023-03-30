@@ -29,7 +29,7 @@
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
 #' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
-#' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
+#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.
 #' @param adj_est logical. If \code{TRUE} the adjusted trimmed means estimate is computed. The default is `FALSE`.
