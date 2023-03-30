@@ -26,7 +26,7 @@ lowest value to be the comparator/reference group}
 for each treatment group. \code{trF} should be equal to or greater than the largest observed
 dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
 
-\item{side}{specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.}
+\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed.}
 
 \item{spread_TG}{a number between 0 and 1, specifying the dropout spread for the treatment group.
 \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
@@ -96,18 +96,18 @@ return only these quantities.
 }
 
 \examples{
-test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
-c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5)))))
+test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
+  c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
 
 colnames(test_dat) <- c("TR", "Y")
 
-test_dat$Y[which(test_dat$TR==0)[1:150]] <- NA
-test_dat$Y[which(test_dat$TR==1)[sample(seq(1,400),
-            200, replace=FALSE)]] <- NA
+test_dat$Y[which(test_dat$TR == 0)[1:150]] <- NA
+test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400),
+            200, replace = FALSE)]] <- NA
 
-tm_bias_obj <- tm_bias(formula= Y ~ TR, "TR", trF=0.5,
-                       side="LOW", spread_TG=0.4,
-                       spread_CG=0.6, data=test_dat)
+tm_bias_obj <- tm_bias(formula = Y ~ TR, "TR", trF = 0.5,
+                       side = "LOW", spread_TG = 0.4,
+                       spread_CG = 0.6, data = test_dat)
 
 print(tm_bias_obj)
 

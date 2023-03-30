@@ -26,7 +26,7 @@ lowest value to be the comparator/reference group}
 for each treatment group. \code{trF} should be equal to or greater than the largest observed
 dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
 
-\item{side}{specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.}
+\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed.}
 
 \item{n_perm}{the number of permutations performed to obtain the p-value and 95\% confidence intervals
 for the estimates. Default is 1000.}
