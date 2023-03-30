@@ -4,7 +4,7 @@ Version: 0.2.0
 Authors@R: c( 
     person("Audinga-Dea", "Hazewinkel",
       role = c("aut", "cre"),
-      email = "a.d.hazewinkel@bristol.ac.uk",
+      email = "dea.hazew@gmail.com",
     comment = c(ORCID = "0000-0002-6923-4388")),
     person("Tom", "Palmer", 
       email = "tom.palmer@bristol.ac.uk", 
