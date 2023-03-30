@@ -14,12 +14,6 @@
 # and the observed and inferred treatment group SDs. Full sample SDs are calculated from the observed SDs,
 # dropout proportions and specified dropout spread, under the assumption of normality.
 
-#testing
-#testing
-
-#testing again
-
-
 #' @name tm_bias
 #' @title Calculating Bias For Trimmed Mean Linear Models:
 #'
