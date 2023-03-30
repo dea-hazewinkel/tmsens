@@ -30,7 +30,7 @@
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
 #' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
-#' @param side specifies if higher value trimming ("HIGH") or lower value trimming ("LOW") should be performed.
+#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed.
 #' @param spread_TG a number between 0 and 1, specifying the dropout spread for the treatment group.
 #' \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
 #' the worst-case scenario is assumed, in which dropout is located on the side of the distribution opposite from the one
