@@ -38,7 +38,6 @@ tm_obj <- tm(formula= Y ~ TR + U + U2, GR = "TR", trF = 0.5,
              side = "LOW", n_perm = 1000, adj_est = TRUE, data = test_dat)
 summary(tm_obj)
 coef(tm_obj)
-
 }
 \seealso{
 \code{\link{tm}}. The function \code{\link{coef}}
