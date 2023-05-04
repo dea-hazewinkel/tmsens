@@ -73,7 +73,7 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
-#' @importFrom stats dnorm lm pnorm qnorm rnorm sd uniroot
+#' @importFrom stats pnorm qnorm rnorm sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
@@ -139,11 +139,11 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
       if(var==GR){
         var1 <- paste(var, TG, sep="")
       } else {var1 <- var}
-      perm.est <- summary(lm(formula, data=data.trim.perm))$coefficients[var1,1]
+      perm.est <- summary(stats::lm(formula, data=data.trim.perm))$coefficients[var1,1]
       return(perm.est)}
 
     perm.testing <- replicate(n_perm, perm.f(data.trim, var))
-    lm.obj <- lm(formula,data.trim)
+    lm.obj <- stats::lm(formula,data.trim)
     if(var==GR){
       var1 <- paste(var, TG, sep="")
     } else {var1 <- var}
