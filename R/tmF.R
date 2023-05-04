@@ -73,7 +73,7 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
-#' @importFrom stats coef dnorm lm pnorm qnorm rnorm sd uniroot
+#' @importFrom stats dnorm lm pnorm qnorm rnorm sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
@@ -267,7 +267,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
       paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
 
-  if (length(coef(x))) {
+  if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
     printCoefmat(coefs, digits = digits, na.print = "NA", ...)
@@ -312,7 +312,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #'              side = "LOW", n_perm = 1000, adj_est = TRUE, data = test_dat)
 #' summary(tm_obj)
 #' coef(tm_obj)
-#'
 #' @export
 summary.tm <- function (object, ...)
 {
@@ -321,7 +320,7 @@ summary.tm <- function (object, ...)
   ans
 }
 
-#' @importFrom stats coef printCoefmat
+#' @importFrom stats printCoefmat
 #' @export
 print.summary.tm <- function (x,
                               digits = max(3L, getOption("digits") - 3L),
@@ -334,7 +333,7 @@ print.summary.tm <- function (x,
   cat("\nAnalysis details:\n")
   cat(x$`Analysis_details`[2], "\n\n", sep = "")
 
-  if (length(coef(x))) {
+  if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
     printCoefmat(coefs, digits = digits, na.print = "NA", ...)
