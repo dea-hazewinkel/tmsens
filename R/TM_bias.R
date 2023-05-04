@@ -244,8 +244,8 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
                   (stats::pnorm(a)-stats::pnorm(b))*-SD)) *F1
     elTR <- (((stats::dnorm(a)-stats::dnorm(b))/
                 (stats::pnorm(a)-stats::pnorm(b))*-SD) -
-               ((((dnorm(a1)-dnorm(b))/
-                    (pnorm(a1)-pnorm(b)))*-SD))) *F1
+               ((((stats::dnorm(a1)-stats::dnorm(b))/
+                    (stats::pnorm(a1)-stats::pnorm(b)))*-SD))) *F1
 
     if(group=="TG"){
       el <- elTR
