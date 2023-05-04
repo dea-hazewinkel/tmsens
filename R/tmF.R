@@ -73,7 +73,7 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
-#' @importFrom stats pnorm qnorm rnorm sd uniroot
+#' @importFrom stats sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
@@ -203,7 +203,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     proc <- NA
   }
 
-  sd(c(rep(NA,10), rnorm(100,0,1)))
+  sd(c(rep(NA,10), stats::rnorm(100,0,1)))
   sdY.trim <- c(sd(data.TGtrim[,vn[1]]),sd(data.CGtrim[,vn[1]]))
   sdY.obs <- c(sd(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE),sd(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE))
   sd_tab <- t(matrix(c(sdY.obs,sdY.trim), nrow=2, ncol=2))
