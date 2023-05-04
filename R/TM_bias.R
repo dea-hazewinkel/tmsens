@@ -510,5 +510,3 @@ print.tm_bias <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
   invisible(x)
 }
-
-
