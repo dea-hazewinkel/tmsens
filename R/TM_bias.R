@@ -104,7 +104,6 @@
 #' print(tm_bias_obj)
 #'
 #' @export
-#' @importFrom stats var
 tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
   cl <- match.call()
@@ -171,8 +170,8 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   data.trim <- rbind(data.TGtrim,data.CGtrim)
   data.trim$TR <- as.factor(data.trim$TR)
 
-  TG_var <- var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
-  CG_var <- var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
+  TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
+  CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
 
   lm.obj <- lm(formula,data.trim)
   beta_t <- summary(lm.obj)$coefficients[paste(GR,TG,sep=""),1]
