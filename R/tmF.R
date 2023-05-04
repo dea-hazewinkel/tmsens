@@ -73,7 +73,6 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
-#' @importFrom stats uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
