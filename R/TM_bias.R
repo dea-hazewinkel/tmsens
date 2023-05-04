@@ -184,8 +184,8 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     fr1 <- (c-dr)/(1-dr)
     fr2 <- (1-c)/(1-dr)
 
-    A <- (1- ((stats::qnorm(c)*stats::dnorm(qnorm(c)))/(c)) -
-            ((stats::dnorm(qnorm(c))/(c)))^2)
+    A <- (1- ((stats::qnorm(c)*stats::dnorm(stats::qnorm(c)))/(c)) -
+            ((stats::dnorm(stats::qnorm(c))/(c)))^2)
     B <- (1- ((-stats::qnorm(c)*stats::dnorm(stats::qnorm(c)))/(1-c))-
             ((-stats::dnorm(stats::qnorm(c))/(1-c)))^2)
     C <- -(stats::dnorm(stats::qnorm(c)))/(c)
@@ -195,7 +195,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
                                fr1*fr2*(C*sigf-D*sigf)^2))-
         obs.var}
 
-    fullSD <- uniroot(fsd, lower=0.1, upper=30)$root
+    fullSD <- stats::uniroot(fsd, lower=0.1, upper=30)$root
     return(fullSD)}
 
 
@@ -313,13 +313,13 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   bias.max <- function(SD, dr, trF, viol.group, side){
 
     if(side=="LOW" & viol.group=="CG"){
-      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="LOW" & viol.group=="TG"){
-      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" & viol.group=="CG"){
-      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" & viol.group=="TG"){
-      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
 
     return(bias)
   }
