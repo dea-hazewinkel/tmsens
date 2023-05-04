@@ -184,12 +184,12 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     fr1 <- (c-dr)/(1-dr)
     fr2 <- (1-c)/(1-dr)
 
-    A <- (1- ((qnorm(c)*dnorm(qnorm(c)))/(c)) -
-            ((dnorm(qnorm(c))/(c)))^2)
-    B <- (1- ((-qnorm(c)*dnorm(qnorm(c)))/(1-c))-
-            ((-dnorm(qnorm(c))/(1-c)))^2)
-    C <- -(dnorm(qnorm(c)))/(c)
-    D <- (dnorm(qnorm(c)))/(1-c)
+    A <- (1- ((stats::qnorm(c)*stats::dnorm(qnorm(c)))/(c)) -
+            ((stats::dnorm(qnorm(c))/(c)))^2)
+    B <- (1- ((-stats::qnorm(c)*stats::dnorm(stats::qnorm(c)))/(1-c))-
+            ((-stats::dnorm(stats::qnorm(c))/(1-c)))^2)
+    C <- -(stats::dnorm(stats::qnorm(c)))/(c)
+    D <- (stats::dnorm(stats::qnorm(c)))/(1-c)
 
     fsd <- function(sigf) {((fr1*A*sigf^2 + fr2*B*sigf^2 +
                                fr1*fr2*(C*sigf-D*sigf)^2))-
@@ -201,10 +201,10 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
 
   LSA.bias <- function(TRSD, PLSD, trF, side){
     if (side=="HIGH"){
-      bias <- -(TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+      bias <- -(TRSD - PLSD) * (stats::dnorm(stats::qnorm(1-trF))-stats::dnorm(stats::qnorm(0)))/
         (1-trF)}
     if(side=="LOW"){
-      bias <- (TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+      bias <- (TRSD - PLSD) * (stats::dnorm(stats::qnorm(1-trF))-stats::dnorm(stats::qnorm(0)))/
         (1-trF)
     }
     return(bias)
@@ -225,25 +225,25 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     c.prop <- DS
 
     bst.prop <- DS+calc.frac
-    a <- qnorm(DS+calc.frac,0,1)
-    b <- qnorm(DS,0,1)
-    a1 <- qnorm(1-trimf,0,1)
+    a <- stats::qnorm(DS+calc.frac,0,1)
+    b <- stats::qnorm(DS,0,1)
+    a1 <- stats::qnorm(1-trimf,0,1)
 
     F1 <- (((1-trimf)-DS)/(1-trimf))
 
     if(DSP<=trimf){
-      a <- qnorm(1-trimf,0,1)
-      b <- qnorm(0,0,1)
-      a1 <- qnorm(1-trimf,0,1)
+      a <- stats::qnorm(1-trimf,0,1)
+      b <- stats::qnorm(0,0,1)
+      a1 <- stats::qnorm(1-trimf,0,1)
       F1 <- 1
     }
 
-    elPL <- ((((dnorm(a1)-dnorm(b))/
-                 (pnorm(a1)-pnorm(b)))*-SD)-
-               ((dnorm(a)-dnorm(b))/
-                  (pnorm(a)-pnorm(b))*-SD)) *F1
-    elTR <- (((dnorm(a)-dnorm(b))/
-                (pnorm(a)-pnorm(b))*-SD) -
+    elPL <- ((((stats::dnorm(a1)-stats::dnorm(b))/
+                 (stats::pnorm(a1)-stats::pnorm(b)))*-SD)-
+               ((stats::dnorm(a)-stats::dnorm(b))/
+                  (stats::pnorm(a)-stats::pnorm(b))*-SD)) *F1
+    elTR <- (((stats::dnorm(a)-stats::dnorm(b))/
+                (stats::pnorm(a)-stats::pnorm(b))*-SD) -
                ((((dnorm(a1)-dnorm(b))/
                     (pnorm(a1)-pnorm(b)))*-SD))) *F1
 
