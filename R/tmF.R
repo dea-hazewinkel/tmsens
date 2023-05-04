@@ -259,7 +259,6 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
 
 #' @export
-#' @importFrom stats coef printCoefmat
 print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
   cat("\nCall:\n",
@@ -269,7 +268,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
   if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
-    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+    stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
   }
   else cat("No coefficients\n")
   cat("\n")
@@ -319,7 +318,6 @@ summary.tm <- function (object, ...)
   ans
 }
 
-#' @importFrom stats printCoefmat
 #' @export
 print.summary.tm <- function (x,
                               digits = max(3L, getOption("digits") - 3L),
@@ -335,7 +333,7 @@ print.summary.tm <- function (x,
   if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
-    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+    stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
   }
   else cat("No coefficients\n")
 
