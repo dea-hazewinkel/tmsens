@@ -173,7 +173,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
   CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
 
-  lm.obj <- lm(formula,data.trim)
+  lm.obj <- stats::lm(formula,data.trim)
   beta_t <- summary(lm.obj)$coefficients[paste(GR,TG,sep=""),1]
   beta_t <- matrix(beta_t)
   colnames(beta_t) <- ""; rownames(beta_t) <- ""
