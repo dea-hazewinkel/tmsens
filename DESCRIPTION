@@ -28,8 +28,6 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: 
-    stats
 URL: https://github.com/dea-hazewinkel/tmsens, https://dea-hazewinkel.github.io/tmsens/
 BugReports: https://github.com/dea-hazewinkel/tmsens/issues
 Suggests: 
