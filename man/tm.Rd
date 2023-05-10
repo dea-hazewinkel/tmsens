@@ -75,9 +75,10 @@ test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
                           rbinom(1000, 2, 0.4), rnorm(1000, 0, 1)))
 colnames(test_dat) <- c("TR", "Y", "U", "U2")
 test_dat$Y[1:200] <- NA
+# Note that we usually recommend setting n_perm to a larger value, e.g., 1000
 tm_obj <- tm(formula= Y ~ TR + U + U2,
              GR = "TR", trF = 0.5, side = "LOW",
-             n_perm = 1000, adj_est = TRUE, data = test_dat)
+             n_perm = 100, adj_est = TRUE, data = test_dat)
 print(tm_obj)
 summary(tm_obj)
 }

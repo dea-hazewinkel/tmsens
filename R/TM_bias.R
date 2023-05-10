@@ -86,23 +86,16 @@
 #' \item{max_bias_TG}{an array of bias components, total bias, the bias adjusted estimate, and inferred full sample
 #' group standard deviations, calculated under the assumption of worst-case scenario dropout, with dropout in the treatment group (TG) on the opposite
 #' side of the distribution from the one that is being trimmed}
-#'
 #' @examples
 #' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
 #'   c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
-#'
 #' colnames(test_dat) <- c("TR", "Y")
-#'
 #' test_dat$Y[which(test_dat$TR == 0)[1:150]] <- NA
-#' test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400),
-#'             200, replace = FALSE)]] <- NA
-#'
+#' test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400), 200, replace = FALSE)]] <- NA
 #' tm_bias_obj <- tm_bias(formula = Y ~ TR, "TR", trF = 0.5,
 #'                        side = "LOW", spread_TG = 0.4,
 #'                        spread_CG = 0.6, data = test_dat)
-#'
 #' print(tm_bias_obj)
-#'
 #' @export
 tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
