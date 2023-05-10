@@ -63,5 +63,3 @@ expect_error(tm_bias(formula= Y ~ TR, "TR", trF=0.35,
                      side="LOW", spread_TG=0.4,
                      spread_CG=0.3, data=B_test_dat),
              "Trimming fraction smaller than largest dropout proportion")
-
-

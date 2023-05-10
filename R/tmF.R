@@ -73,7 +73,6 @@
 #' print(tm_obj)
 #' summary(tm_obj)
 #' @export
-#' @importFrom stats coef dnorm lm pnorm qnorm rnorm sd uniroot
 tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est=FALSE, data){
 
   cl <- match.call()
@@ -139,17 +138,17 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
       if(var==GR){
         var1 <- paste(var, TG, sep="")
       } else {var1 <- var}
-      perm.est <- summary(lm(formula, data=data.trim.perm))$coefficients[var1,1]
+      perm.est <- summary(stats::lm(formula, data=data.trim.perm))$coefficients[var1,1]
       return(perm.est)}
 
     perm.testing <- replicate(n_perm, perm.f(data.trim, var))
-    lm.obj <- lm(formula,data.trim)
+    lm.obj <- stats::lm(formula,data.trim)
     if(var==GR){
       var1 <- paste(var, TG, sep="")
     } else {var1 <- var}
     beta_t <- summary(lm.obj)$coefficients[var1,1]
     Pval <- (length(perm.testing)-sum(beta_t>perm.testing))/length(perm.testing)
-    sd.perm <- sd(perm.testing)
+    sd.perm <- stats::sd(perm.testing)
     conf.int <- c(beta_t-sd.perm*1.96, beta_t+sd.perm*1.96)
     out <- c(beta_t, Pval, conf.int)
     names(out) <- c("Estimate", "Pval", "95% CI LO", "95% CI HI")
@@ -178,7 +177,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
       proc <- paste("Treatment (", ") group rescaled", sep=TG)
     }
 
-    SD.oth <- sqrt((sd(dat.oth[, vn[1]])^2)/(1-2/pi))
+    SD.oth <- sqrt((stats::sd(dat.oth[, vn[1]])^2)/(1-2/pi))
 
     x1 <- dat.resc[, vn[1]]
 
@@ -189,7 +188,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
     x3a <- c(x1,x2)
     x3 <- x3a - mean(x3a)
-    x4 <- x3/(sd(x3)/SD.oth)
+    x4 <- x3/(stats::sd(x3)/SD.oth)
     x4 <- x4 - mean(x4)
     x5 <- x4 + mean(x3a)
     x6 <- x5[1:length(x1)]
@@ -203,9 +202,9 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     proc <- NA
   }
 
-  sd(c(rep(NA,10), rnorm(100,0,1)))
-  sdY.trim <- c(sd(data.TGtrim[,vn[1]]),sd(data.CGtrim[,vn[1]]))
-  sdY.obs <- c(sd(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE),sd(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE))
+  stats::sd(c(rep(NA,10), stats::rnorm(100,0,1)))
+  sdY.trim <- c(stats::sd(data.TGtrim[,vn[1]]),stats::sd(data.CGtrim[,vn[1]]))
+  sdY.obs <- c(stats::sd(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE),stats::sd(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE))
   sd_tab <- t(matrix(c(sdY.obs,sdY.trim), nrow=2, ncol=2))
   rownames(sd_tab) <- c(paste("Observed outcomes", vn[1], sep=" "), paste("Trimmed outcomes", vn[1], sep=" "))
   colnames(sd_tab) <- c(TG,CG)
@@ -260,17 +259,16 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
 
 #' @export
-#' @importFrom stats coef printCoefmat
 print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 {
   cat("\nCall:\n",
       paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
 
-  if (length(coef(x))) {
+  if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
-    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+    stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
   }
   else cat("No coefficients\n")
   cat("\n")
@@ -312,7 +310,6 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #'              side = "LOW", n_perm = 1000, adj_est = TRUE, data = test_dat)
 #' summary(tm_obj)
 #' coef(tm_obj)
-#'
 #' @export
 summary.tm <- function (object, ...)
 {
@@ -321,7 +318,6 @@ summary.tm <- function (object, ...)
   ans
 }
 
-#' @importFrom stats coef printCoefmat
 #' @export
 print.summary.tm <- function (x,
                               digits = max(3L, getOption("digits") - 3L),
@@ -334,10 +330,10 @@ print.summary.tm <- function (x,
   cat("\nAnalysis details:\n")
   cat(x$`Analysis_details`[2], "\n\n", sep = "")
 
-  if (length(coef(x))) {
+  if (length(stats::coef(x))) {
     cat("Coefficients:\n")
     coefs <- x$coefficients
-    printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+    stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
   }
   else cat("No coefficients\n")
 

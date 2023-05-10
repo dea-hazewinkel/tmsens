@@ -45,5 +45,3 @@ expect_error(tm(Y ~ TR + U + U2, GR="TR", trF=0.5, side="LOW", n_perm=1000, adj_
 
 expect_error(tm(Y ~ TR + U + U2, GR="TR", trF=0.3, side="LOW", n_perm=1000, adj_est=FALSE, data=test_dat),
              "Trimming fraction smaller than largest dropout proportion")
-
-

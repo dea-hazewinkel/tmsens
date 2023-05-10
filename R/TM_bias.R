@@ -104,7 +104,6 @@
 #' print(tm_bias_obj)
 #'
 #' @export
-#' @importFrom stats var
 tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
   cl <- match.call()
@@ -171,10 +170,10 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   data.trim <- rbind(data.TGtrim,data.CGtrim)
   data.trim$TR <- as.factor(data.trim$TR)
 
-  TG_var <- var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
-  CG_var <- var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
+  TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
+  CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
 
-  lm.obj <- lm(formula,data.trim)
+  lm.obj <- stats::lm(formula,data.trim)
   beta_t <- summary(lm.obj)$coefficients[paste(GR,TG,sep=""),1]
   beta_t <- matrix(beta_t)
   colnames(beta_t) <- ""; rownames(beta_t) <- ""
@@ -185,27 +184,27 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     fr1 <- (c-dr)/(1-dr)
     fr2 <- (1-c)/(1-dr)
 
-    A <- (1- ((qnorm(c)*dnorm(qnorm(c)))/(c)) -
-            ((dnorm(qnorm(c))/(c)))^2)
-    B <- (1- ((-qnorm(c)*dnorm(qnorm(c)))/(1-c))-
-            ((-dnorm(qnorm(c))/(1-c)))^2)
-    C <- -(dnorm(qnorm(c)))/(c)
-    D <- (dnorm(qnorm(c)))/(1-c)
+    A <- (1- ((stats::qnorm(c)*stats::dnorm(stats::qnorm(c)))/(c)) -
+            ((stats::dnorm(stats::qnorm(c))/(c)))^2)
+    B <- (1- ((-stats::qnorm(c)*stats::dnorm(stats::qnorm(c)))/(1-c))-
+            ((-stats::dnorm(stats::qnorm(c))/(1-c)))^2)
+    C <- -(stats::dnorm(stats::qnorm(c)))/(c)
+    D <- (stats::dnorm(stats::qnorm(c)))/(1-c)
 
     fsd <- function(sigf) {((fr1*A*sigf^2 + fr2*B*sigf^2 +
                                fr1*fr2*(C*sigf-D*sigf)^2))-
         obs.var}
 
-    fullSD <- uniroot(fsd, lower=0.1, upper=30)$root
+    fullSD <- stats::uniroot(fsd, lower=0.1, upper=30)$root
     return(fullSD)}
 
 
   LSA.bias <- function(TRSD, PLSD, trF, side){
     if (side=="HIGH"){
-      bias <- -(TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+      bias <- -(TRSD - PLSD) * (stats::dnorm(stats::qnorm(1-trF))-stats::dnorm(stats::qnorm(0)))/
         (1-trF)}
     if(side=="LOW"){
-      bias <- (TRSD - PLSD) * (dnorm(qnorm(1-trF))-dnorm(qnorm(0)))/
+      bias <- (TRSD - PLSD) * (stats::dnorm(stats::qnorm(1-trF))-stats::dnorm(stats::qnorm(0)))/
         (1-trF)
     }
     return(bias)
@@ -226,27 +225,27 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     c.prop <- DS
 
     bst.prop <- DS+calc.frac
-    a <- qnorm(DS+calc.frac,0,1)
-    b <- qnorm(DS,0,1)
-    a1 <- qnorm(1-trimf,0,1)
+    a <- stats::qnorm(DS+calc.frac,0,1)
+    b <- stats::qnorm(DS,0,1)
+    a1 <- stats::qnorm(1-trimf,0,1)
 
     F1 <- (((1-trimf)-DS)/(1-trimf))
 
     if(DSP<=trimf){
-      a <- qnorm(1-trimf,0,1)
-      b <- qnorm(0,0,1)
-      a1 <- qnorm(1-trimf,0,1)
+      a <- stats::qnorm(1-trimf,0,1)
+      b <- stats::qnorm(0,0,1)
+      a1 <- stats::qnorm(1-trimf,0,1)
       F1 <- 1
     }
 
-    elPL <- ((((dnorm(a1)-dnorm(b))/
-                 (pnorm(a1)-pnorm(b)))*-SD)-
-               ((dnorm(a)-dnorm(b))/
-                  (pnorm(a)-pnorm(b))*-SD)) *F1
-    elTR <- (((dnorm(a)-dnorm(b))/
-                (pnorm(a)-pnorm(b))*-SD) -
-               ((((dnorm(a1)-dnorm(b))/
-                    (pnorm(a1)-pnorm(b)))*-SD))) *F1
+    elPL <- ((((stats::dnorm(a1)-stats::dnorm(b))/
+                 (stats::pnorm(a1)-stats::pnorm(b)))*-SD)-
+               ((stats::dnorm(a)-stats::dnorm(b))/
+                  (stats::pnorm(a)-stats::pnorm(b))*-SD)) *F1
+    elTR <- (((stats::dnorm(a)-stats::dnorm(b))/
+                (stats::pnorm(a)-stats::pnorm(b))*-SD) -
+               ((((stats::dnorm(a1)-stats::dnorm(b))/
+                    (stats::pnorm(a1)-stats::pnorm(b)))*-SD))) *F1
 
     if(group=="TG"){
       el <- elTR
@@ -314,13 +313,13 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   bias.max <- function(SD, dr, trF, viol.group, side){
 
     if(side=="LOW" & viol.group=="CG"){
-      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="LOW" & viol.group=="TG"){
-      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" & viol.group=="CG"){
-      bias <- -SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" & viol.group=="TG"){
-      bias <- SD/(1-dr)* (dnorm(qnorm(trF))--dnorm(qnorm(1-dr))-dnorm(qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
 
     return(bias)
   }
@@ -511,5 +510,3 @@ print.tm_bias <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
   invisible(x)
 }
-
-
