@@ -1,5 +1,6 @@
 context("tmf")
 
+skip_on_cran()
 
 set.seed(407774)
 test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),

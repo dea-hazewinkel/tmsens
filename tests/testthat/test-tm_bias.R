@@ -1,5 +1,7 @@
 context("tm_bias")
 
+skip_on_cran()
+
 set.seed(4077)
 B_test_dat <- as.data.frame(cbind(c(rep(0,500),rep(1,500)),
                                 c(sort(rnorm(500,0,1)),sort(rnorm(500,1,1.5)))))
