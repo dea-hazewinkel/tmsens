@@ -98,17 +98,11 @@ return only these quantities.
 \examples{
 test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
   c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
-
 colnames(test_dat) <- c("TR", "Y")
-
 test_dat$Y[which(test_dat$TR == 0)[1:150]] <- NA
-test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400),
-            200, replace = FALSE)]] <- NA
-
+test_dat$Y[which(test_dat$TR == 1)[sample(seq(1, 400), 200, replace = FALSE)]] <- NA
 tm_bias_obj <- tm_bias(formula = Y ~ TR, "TR", trF = 0.5,
                        side = "LOW", spread_TG = 0.4,
                        spread_CG = 0.6, data = test_dat)
-
 print(tm_bias_obj)
-
 }
