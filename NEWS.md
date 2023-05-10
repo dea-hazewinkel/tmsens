@@ -2,6 +2,8 @@
 
 * Simplified the NAMESPACE so functions from other packages are not imported
 
+* Modified the `tm()` helpfile example to run faster
+
 # tmsens 0.2.0
 
 * Bump roxygen2 version
