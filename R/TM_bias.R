@@ -100,9 +100,7 @@
 #' tm_bias_obj <- tm_bias(formula = Y ~ TR, "TR", trF = 0.5,
 #'                        side = "LOW", spread_TG = 0.4,
 #'                        spread_CG = 0.6, data = test_dat)
-#'
 #' print(tm_bias_obj)
-#'
 #' @export
 tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
