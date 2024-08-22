@@ -7,11 +7,13 @@
  <!-- badges: end -->
 
 **tmsens** is on CRAN, you can install it in R with
+
 ```r
 install.packages("tmsens")
 ```
 
 Or you can install the development version from GitHub with
+
 ```r
 # install.packages("remotes") # uncomment if remotes not installed
 remotes::install_github("dea-hazewinkel/tmsens")
