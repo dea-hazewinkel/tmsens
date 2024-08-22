@@ -11,8 +11,10 @@ colMeans(test_dat)
 
 test_dat0 <- test_dat
 test_dat$Y[1:200] <- NA
-test_dat2 <- test_dat; test_dat2$Y[1:10] <- "Oops"
-test_dat3 <- test_dat; test_dat3$TR[1:10] <- 3
+test_dat2 <- test_dat
+test_dat2$Y[1:10] <- "Oops"
+test_dat3 <- test_dat
+test_dat3$TR[1:10] <- 3
 
 
 # checking TM estimate and adjusted TM estimate
