@@ -270,8 +270,9 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
     cat("Coefficients:\n")
     coefs <- x$coefficients
     stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+  } else {
+    cat("No coefficients\n")
   }
-  else cat("No coefficients\n")
   cat("\n")
   invisible(x)
 }
@@ -335,8 +336,9 @@ print.summary.tm <- function (x,
     cat("Coefficients:\n")
     coefs <- x$coefficients
     stats::printCoefmat(coefs, digits = digits, na.print = "NA", ...)
+  } else {
+    cat("No coefficients\n")
   }
-  else cat("No coefficients\n")
 
   cat("\n\nDropout:\n")
   cat(format(x$dropout[[2]] * 100, digits = digits), "%", sep="")
