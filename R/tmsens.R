@@ -4,5 +4,4 @@
 #'
 #' @name tmsens-package
 #' @aliases tmsens
-#' @docType package
-NULL
+"_PACKAGE"
