@@ -246,7 +246,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
       el <- elPL}
     }
 
-    if(group!="CG" & group!="TG"){
+    if(group!="CG" && group!="TG"){
       el <- NA}
 
     if(side=="HIGH"){
@@ -260,7 +260,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
 
 
 
-  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+  if(is.numeric(spread_CG) && is.numeric(spread_TG)){
 
     TG_SD_inf <- SD.func.extr(spread=spread_TG, dr=TG.drop,
                               obs.var=TG_var)
