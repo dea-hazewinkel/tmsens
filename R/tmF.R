@@ -157,7 +157,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
   }
 
   perm.out <- list()
-  for (i in 1:length(vn[-1])){
+  for (i in seq_along(vn[-1])){
     perm.out[[i]] <- perm.func(data.trim, vn[1+i], n_perm)
   }
 
@@ -192,7 +192,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     x4 <- x3/(stats::sd(x3)/SD.oth)
     x4 <- x4 - mean(x4)
     x5 <- x4 + mean(x3a)
-    x6 <- x5[1:length(x1)]
+    x6 <- x5[seq_along(x1)]
     dat.resc[,vn[1]] <- x6
     dat.trim.resc <- rbind(dat.resc,dat.oth)
     dat.trim.resc$TR <- as.factor(dat.trim.resc$TR)
