@@ -1,3 +1,12 @@
 url: https://dea-hazewinkel.github.io/tmsens/
 template:
   bootstrap: 5
+  lightswitch: true
+navbar:
+  structure:
+    right: [search, cran, github, lightswitch]
+  components:
+    cran:
+      icon: fab fa-r-project
+      href: https://cran.r-project.org/package=tmsens
+      aria-label: View on CRAN

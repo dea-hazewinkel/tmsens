@@ -8,3 +8,25 @@
 \description{
 This package implements sensitivity analysis using the trimmed mean estimator.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/dea-hazewinkel/tmsens}
+  \item \url{https://dea-hazewinkel.github.io/tmsens/}
+  \item \url{https://mrcieu.r-universe.dev/tmsens}
+  \item Report bugs at \url{https://github.com/dea-hazewinkel/tmsens/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Audinga-Dea Hazewinkel \email{dea.hazew@gmail.com} (\href{https://orcid.org/0000-0002-6923-4388}{ORCID})
+
+Authors:
+\itemize{
+  \item Tom Palmer \email{remlapmot@hotmail.com} (\href{https://orcid.org/0000-0003-4655-4511}{ORCID})
+  \item Kate Tilling \email{kate.tilling@bristol.ac.uk} (\href{https://orcid.org/0000-0002-1010-8926}{ORCID})
+  \item Kaitlin Wade \email{kaitlin.wade@bristol.ac.uk} (\href{https://orcid.org/0000-0003-3362-6280}{ORCID})
+  \item Jack Bowden \email{j.bowden2@exeter.ac.uk} (\href{https://orcid.org/0000-0003-2628-3304}{ORCID})
+}
+
+}

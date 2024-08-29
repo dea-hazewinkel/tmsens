@@ -1,3 +1,7 @@
+# tmsens 0.3.1
+
+* Minor fixes to improve the code, the documentation, and the package website
+
 # tmsens 0.3.0
 
 * Simplified the NAMESPACE so functions from other packages are not imported

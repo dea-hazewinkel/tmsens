@@ -1,6 +1,6 @@
 Package: tmsens
 Title: Sensitivity Analysis Using the Trimmed Means Estimator
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
     person("Audinga-Dea", "Hazewinkel", , "dea.hazew@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6923-4388")),
@@ -16,10 +16,11 @@ Authors@R: c(
 Description: Sensitivity analysis using the trimmed means estimator.
 License: GPL (>= 3)
 URL: https://github.com/dea-hazewinkel/tmsens,
-    https://dea-hazewinkel.github.io/tmsens/
+    https://dea-hazewinkel.github.io/tmsens/,
+    https://mrcieu.r-universe.dev/tmsens
 BugReports: https://github.com/dea-hazewinkel/tmsens/issues
 Suggests: 
     testthat
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

@@ -246,7 +246,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
       el <- elPL}
     }
 
-    if(group!="CG" & group!="TG"){
+    if(group!="CG" && group!="TG"){
       el <- NA}
 
     if(side=="HIGH"){
@@ -260,7 +260,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
 
 
 
-  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+  if(is.numeric(spread_CG) && is.numeric(spread_TG)){
 
     TG_SD_inf <- SD.func.extr(spread=spread_TG, dr=TG.drop,
                               obs.var=TG_var)
@@ -305,13 +305,13 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
 
   bias.max <- function(SD, dr, trF, viol.group, side){
 
-    if(side=="LOW" & viol.group=="CG"){
+    if(side=="LOW" && viol.group=="CG"){
       bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
-    if(side=="LOW" & viol.group=="TG"){
+    if(side=="LOW" && viol.group=="TG"){
       bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
-    if(side=="HIGH" & viol.group=="CG"){
+    if(side=="HIGH" && viol.group=="CG"){
       bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
-    if(side=="HIGH" & viol.group=="TG"){
+    if(side=="HIGH" && viol.group=="TG"){
       bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
 
     return(bias)
@@ -362,7 +362,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     spread_TG <- 1
   }
 
-  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+  if(is.numeric(spread_CG) && is.numeric(spread_TG)){
     analysis_details <- matrix(c(paste(paste(round(trF*100,1), "%", sep=""), "trimming,", sep=" "),
                                  paste(paste("under assumption of", trimside, sep=" "), "value dropout,", sep=" "),
                                  paste(paste("with", paste(round(spread_TG*100,1), "% dropout spread in the TG group (", sep=""), sep=" "),
@@ -379,7 +379,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   }
 
 
-  if(is.numeric(spread_CG) & is.numeric(spread_TG)){
+  if(is.numeric(spread_CG) && is.numeric(spread_TG)){
     infSDTG <- matrix(c(paste(paste(paste(paste("Inferred TG group (", paste(paste(TG, ")", sep=""),"full sample SD for", sep=" "), sep=" "),
                                           paste(round(TG.drop*100,1), "%", sep=""), sep=" "),"dropout in the", sep=" "),
                               paste(paste(trimside, paste(round(spread_TG*100,1),"%", sep=""), sep=" "), "of the distribution", sep=" "), sep=" "),
