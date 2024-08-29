@@ -1,7 +1,7 @@
 url: https://dea-hazewinkel.github.io/tmsens/
 template:
   bootstrap: 5
-  lightswitch: true
+  light-switch: true
 navbar:
   structure:
     right: [search, cran, github, lightswitch]
