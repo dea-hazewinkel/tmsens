@@ -178,6 +178,9 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
 
   SD.func.extr <- function(spread, dr, obs.var){
 
+    # no dropout: the full sample is fully observed, so its SD is the observed SD
+    if (spread==0){ return(sqrt(obs.var)) }
+
     c <- spread
     fr1 <- (c-dr)/(1-dr)
     fr2 <- (1-c)/(1-dr)
