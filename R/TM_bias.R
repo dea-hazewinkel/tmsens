@@ -175,12 +175,7 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
     if (DSP <= trimf){
       calc.frac <- 0
     }
-    calc.frac
 
-    b.prop <- 1-trimf
-    c.prop <- DS
-
-    bst.prop <- DS+calc.frac
     a <- stats::qnorm(DS+calc.frac,0,1)
     b <- stats::qnorm(DS,0,1)
     a1 <- stats::qnorm(1-trimf,0,1)
