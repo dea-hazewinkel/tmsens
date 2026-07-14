@@ -202,8 +202,6 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     perm.out.TR.adj <- t(data.frame(perm.func(dat.trim.resc, GR, n_perm)))
     rownames(perm.out.TR.adj) <- paste(GR, "adj", sep="")
 
-  } else {
-    proc <- NA
   }
 
   stats::sd(c(rep(NA,10), stats::rnorm(100,0,1)))
@@ -237,9 +235,13 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
   names(trimside) <- "trimming side"
 
   tp <- paste(paste(round(trF*100,1), "%", sep=""), trimside, sep=" ")
-  tp1 <- paste(as.character(proc), "for adjusted TM estimate", sep=" ")
-  an.det <- (matrix(c(tp, tp1), nrow=2,ncol=1))
-  rownames(an.det) <- c("", "")
+  if(adj_est==TRUE){
+    tp1 <- paste(proc, "for adjusted TM estimate", sep=" ")
+    an.det <- matrix(c(tp, tp1), nrow=2, ncol=1)
+  } else {
+    an.det <- matrix(tp, nrow=1, ncol=1)
+  }
+  rownames(an.det) <- rep("", nrow(an.det))
   colnames(an.det) <- c("Analysis details")
 
   final.out <- list()
@@ -332,8 +334,10 @@ print.summary.tm <- function (x,
       paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
 
-  cat("\nAnalysis details:\n")
-  cat(x$`Analysis_details`[2], "\n\n", sep = "")
+  if (nrow(x$`Analysis_details`) > 1) {
+    cat("\nAnalysis details:\n")
+    cat(x$`Analysis_details`[2], "\n\n", sep = "")
+  }
 
   if (length(stats::coef(x))) {
     cat("Coefficients:\n")
@@ -344,10 +348,13 @@ print.summary.tm <- function (x,
   }
 
   cat("\n\nDropout:\n")
-  cat(format(x$dropout[[2]] * 100, digits = digits), "%", sep="")
+  dropout <- stats::setNames(paste(format(as.vector(x$dropout) * 100, digits = digits), "%", sep=""),
+                             colnames(x$dropout))
+  print.default(dropout, quote = FALSE, print.gap = 2L)
 
-  cat("\n\nSample size after trimming:\n")
-  cat(format(x$n_after_trimming[[1]], digits = digits))
+  cat("\nSample size after trimming:\n")
+  n_after <- stats::setNames(as.vector(x$n_after_trimming), colnames(x$n_after_trimming))
+  print.default(n_after, print.gap = 2L)
 
   cat("\n\nTrimming fraction: \n",
       format(x$trimfrac*100, digits = digits),
