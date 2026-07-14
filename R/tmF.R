@@ -28,7 +28,8 @@
 #' lowest value to be the comparator/reference group
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
-#' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
+#' dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+#' or a trimming fraction of 0.5 if there is no dropout.
 #' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed. The default is `"LOW"`.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.

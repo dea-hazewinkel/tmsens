@@ -29,7 +29,8 @@
 #' lowest value to be the comparator/reference group
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
-#' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
+#' dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+#' or a trimming fraction of 0.5 if there is no dropout.
 #' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed. The default is `"LOW"`.
 #' @param spread_TG a number between 0 and 1, specifying the dropout spread for the treatment group.
 #' \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
@@ -98,7 +99,7 @@
 #'                        spread_CG = 0.6, data = test_dat)
 #' print(tm_bias_obj)
 #' @export
-tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
+tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
   cl <- match.call()
 
