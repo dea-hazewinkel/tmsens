@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmF.R
 \name{tm}
 \alias{tm}
-\title{Fitting Trimmed Mean Linear Models:}
+\title{Fitting Trimmed Mean Linear Models}
 \usage{
 tm(
   formula,
@@ -24,9 +24,10 @@ lowest value to be the comparator/reference group}
 
 \item{trF}{a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 for each treatment group. \code{trF} should be equal to or greater than the largest observed
-dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
+dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+or a trimming fraction of 0.5 if there is no dropout.}
 
-\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed.}
+\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed. The default is \code{"LOW"}.}
 
 \item{n_perm}{the number of permutations performed to obtain the p-value and 95\% confidence intervals
 for the estimates. Default is 1000.}
@@ -49,7 +50,7 @@ An object of class "\code{tm}" is a list containing the following components:
 \item{trimside}{specifies if lower or higher value trimming was performed}
 \item{n_after_trimming}{the number of observations per treatment group after trimming}
 \item{coefficients}{an array of coefficients with corresponding p-values and 95\% confidence intervals}
-\item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
+\item{Analysis_details}{reiterates trimming fraction and side, and, for \code{adj_est=TRUE} specifies if the adjustment was performed on the comparator or treatment group.}
 \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 }
 \description{

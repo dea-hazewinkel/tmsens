@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmF.R
 \name{summary.tm}
 \alias{summary.tm}
-\title{Summarizing Trimmed Means Linear Model fits:}
+\title{Summarizing Trimmed Means Linear Model Fits}
 \usage{
 \method{summary}{tm}(object, ...)
 }
@@ -12,7 +12,7 @@
 \item{...}{user specified arguments}
 }
 \value{
-\code{summary.tm} returns an list of summary statistics of the fitted trimmed means linear
+\code{summary.tm} returns a list of summary statistics of the fitted trimmed means linear
 model in \code{object}, with components
 \item{call}{the matched call}
 \item{n}{the number of observations per treatment group}
@@ -21,7 +21,7 @@ model in \code{object}, with components
 \item{trimside}{specifies if lower or higher value trimming was performed}
 \item{n_after_trimming}{the number of observations per treatment group after trimming}
 \item{coefficients}{an array of coefficients with corresponding p-values and 95\% confidence intervals}
-\item{Analysis_details}{reiterates trimming fraction and side, and, for \code{adjest=TRUE} specifies if the adjustment was performed on the comparator or treatment group.}
+\item{Analysis_details}{reiterates trimming fraction and side, and, for \code{adj_est=TRUE} specifies if the adjustment was performed on the comparator or treatment group.}
 \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 }
 \description{
