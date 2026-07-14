@@ -76,7 +76,7 @@ trim_data <- function(formula, GR, trF, side, data){
 }
 
 #' @name tm
-#' @title Fitting Trimmed Mean Linear Models:
+#' @title Fitting Trimmed Mean Linear Models
 #'
 #' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
@@ -305,7 +305,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
 
 #' @name summary.tm
-#' @title Summarizing Trimmed Means Linear Model fits:
+#' @title Summarizing Trimmed Means Linear Model Fits
 #'
 #' @description \code{summary} method for class "\code{tm}".
 #'

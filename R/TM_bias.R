@@ -15,7 +15,7 @@
 # dropout proportions and specified dropout spread, under the assumption of normality.
 
 #' @name tm_bias
-#' @title Calculating Bias For Trimmed Mean Linear Models:
+#' @title Calculating Bias For Trimmed Mean Linear Models
 #'
 #' @description \code{tm_bias} calculates the bias and the bias-adjusted estimate for a trimmed means analysis ([`tm`]) of a given
 #' dataset, for a user-specified trimming fraction and dropout spread. \code{tm_bias} calculates, under assumption
