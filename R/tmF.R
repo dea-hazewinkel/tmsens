@@ -5,7 +5,7 @@
 #   but nothing smaller than the largest observed dropout proportion.
 # - If no trimming fraction is specified, and there is no dropout, then the default is 50% trimming
 # - Trimming side is user specified (LOWer value trimming or HIGHer value trimming)
-# - n_perm is the number of permutation to obtain p value/ 95% CI. Default value is 1000
+# - n_perm is the number of permutations to obtain the p-value / 95% CI. Default value is 1000
 # - The adjusted estimate can only be computed for 50% trimming. Default is no calculation of the adjusted
 # - estimate (adj_est=FALSE).
 # details. The trimmed means estimate is subject to two assumptions: the strong MNAR assumption
