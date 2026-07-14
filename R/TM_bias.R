@@ -75,7 +75,7 @@
 #' Strong MNAR bias in the treatment group (TG) and the comparator group (CG)}
 #' \item{total_bias}{the sum of all bias components}
 #' \item{TM_estimate}{the trimmed means estimate of the treatment effect}
-#' \item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate }
+#' \item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate}
 #' \item{analysis_details}{the user-specified trimming fraction, trimming side, and dropout spread in the
 #' treatment (TG) and comparator groups (CG)}
 #' \item{observed_TG_SD}{observed standard deviation of the treatment group (TG) outcome}
