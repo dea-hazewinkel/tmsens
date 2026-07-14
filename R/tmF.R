@@ -148,7 +148,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
       var1 <- paste(var, TG, sep="")
     } else {var1 <- var}
     beta_t <- summary(lm.obj)$coefficients[var1,1]
-    Pval <- (length(perm.testing)-sum(beta_t>perm.testing))/length(perm.testing)
+    Pval <- (sum(abs(perm.testing)>=abs(beta_t))+1)/(length(perm.testing)+1)
     sd.perm <- stats::sd(perm.testing)
     conf.int <- c(beta_t-sd.perm*1.96, beta_t+sd.perm*1.96)
     out <- c(beta_t, Pval, conf.int)
