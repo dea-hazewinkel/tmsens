@@ -139,6 +139,7 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
       trF=0.5
     }
   } else {
+    if (!is.numeric(trF) || length(trF)!=1 || trF<=0 || trF>=1){ stop("trF must be a single number greater than 0 and less than 1")}
     if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
   }
 
