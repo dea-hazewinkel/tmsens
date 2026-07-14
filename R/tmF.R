@@ -185,7 +185,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     if (side=="LOW"){
       x2 <- min(x1) - (abs((min(x1)-x1)))}
     if (side=="HIGH"){
-      x2 <- min(x1) + (abs((min(x1)+x1)))}
+      x2 <- max(x1) + (abs((max(x1)-x1)))}
 
     x3a <- c(x1,x2)
     x3 <- x3a - mean(x3a)
