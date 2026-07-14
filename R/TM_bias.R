@@ -156,8 +156,8 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
     data.CG <- data.CG[order(data.CG[,vn[1]]),]
     data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG):nrow(data.TG)),]
-    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG):nrow(data.CG)),]
+    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG+1):nrow(data.TG)),]
+    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG+1):nrow(data.CG)),]
   }
 
   data.trim <- rbind(data.TGtrim,data.CGtrim)
