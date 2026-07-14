@@ -85,7 +85,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   if(!(GR %in% vn)){stop("TR variable not in data")}
   if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
+  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
 
   TR <- as.factor(data[,GR])
   CG <- levels(TR)[1]
@@ -218,7 +218,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   names(trF) <- "trimming fraction"
 
-  n_tot <- t(matrix(c(sum(TR==TG),sum(TR==CG))))
+  n_tot <- t(matrix(c(sum(TR==TG, na.rm=TRUE),sum(TR==CG, na.rm=TRUE))))
   rownames(n_tot) <- c("N")
   colnames(n_tot) <- c(TG,CG)
 

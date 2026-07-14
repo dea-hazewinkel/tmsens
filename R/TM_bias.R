@@ -109,7 +109,7 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
 
   if(!(GR %in% vn)){stop("TR variable not in data")}
   if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
+  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
 
   TR <- as.factor(data[,GR])
   CG <- levels(TR)[1]
