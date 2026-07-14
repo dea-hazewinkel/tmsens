@@ -204,7 +204,6 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   }
 
-  stats::sd(c(rep(NA,10), stats::rnorm(100,0,1)))
   sdY.trim <- c(stats::sd(data.TGtrim[,vn[1]]),stats::sd(data.CGtrim[,vn[1]]))
   sdY.obs <- c(stats::sd(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE),stats::sd(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE))
   sd_tab <- t(matrix(c(sdY.obs,sdY.trim), nrow=2, ncol=2))
