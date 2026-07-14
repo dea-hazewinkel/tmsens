@@ -136,22 +136,23 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   perm.func <- function(data.trim, var, n_perm){
 
-    perm.f <- function(data.trim, var){
-      new.tr <- sample(data.trim[,var], replace=FALSE)
-      data.trim.perm <- data.trim
-      data.trim.perm[,var] <- new.tr
-      if(var==GR){
-        var1 <- paste(var, TG, sep="")
-      } else {var1 <- var}
-      perm.est <- summary(stats::lm(formula, data=data.trim.perm))$coefficients[var1,1]
-      return(perm.est)}
+    mf <- stats::model.frame(formula, data=data.trim)
+    Y.mm <- stats::model.response(mf)
+    X.mm <- stats::model.matrix(formula, mf)
 
-    perm.testing <- replicate(n_perm, perm.f(data.trim, var))
-    lm.obj <- stats::lm(formula,data.trim)
     if(var==GR){
       var1 <- paste(var, TG, sep="")
     } else {var1 <- var}
-    beta_t <- summary(lm.obj)$coefficients[var1,1]
+    cols <- which(attr(X.mm, "assign") == match(var, attr(stats::terms(mf), "term.labels")))
+
+    perm.f <- function(){
+      X.perm <- X.mm
+      X.perm[,cols] <- X.mm[sample(nrow(X.mm), replace=FALSE),cols]
+      stats::lm.fit(X.perm, Y.mm)$coefficients[[var1]]
+    }
+
+    perm.testing <- replicate(n_perm, perm.f())
+    beta_t <- stats::lm.fit(X.mm, Y.mm)$coefficients[[var1]]
     Pval <- (sum(abs(perm.testing)>=abs(beta_t))+1)/(length(perm.testing)+1)
     sd.perm <- stats::sd(perm.testing)
     conf.int <- c(beta_t-sd.perm*1.96, beta_t+sd.perm*1.96)
