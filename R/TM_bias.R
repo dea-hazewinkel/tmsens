@@ -105,21 +105,14 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
 
   side <- match.arg(side)
 
-  vn <- all.vars(formula)
-
-  if(!(GR %in% vn)){stop("TR variable not in data")}
-  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
-
-  TR <- as.factor(data[,GR])
-  CG <- levels(TR)[1]
-  TG <- levels(TR)[2]
-
-  data.CG <- data[which(data[,GR]==CG),]
-  data.TG <- data[which(data[,GR]==TG),]
-
-  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
-  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
+  td <- trim_data(formula, GR, trF, side, data)
+  vn <- td$vn
+  CG <- td$CG
+  TG <- td$TG
+  CG.drop <- td$CG.drop
+  TG.drop <- td$TG.drop
+  trF <- td$trF
+  data.trim <- td$data.trim
 
   if (spread_TG==1){
     spread_TG <- 0.999
@@ -129,44 +122,6 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
   }
   if (spread_TG < TG.drop ){stop("Treatment Gr spread smaller than dropout proportion")}
   if (spread_CG < CG.drop ){stop("Comparator Gr spread smaller than dropout proportion")}
-
-
-  drop <- max(CG.drop,TG.drop)
-
-  if(is.null(trF)){
-    trF <- drop
-    if(drop==0){
-      trF=0.5
-    }
-  } else {
-    if (!is.numeric(trF) || length(trF)!=1 || trF<=0 || trF>=1){ stop("trF must be a single number greater than 0 and less than 1")}
-    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
-  }
-
-  rems.TG <- ceiling(nrow(data.TG)*trF)
-  rems.CG <- ceiling(nrow(data.CG)*trF)
-
-  if(side=="LOW"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-(1:rems.TG),]
-    data.CGtrim <- data.CG[-(1:rems.CG),]
-  }
-
-
-  if(side=="HIGH"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG+1):nrow(data.TG)),]
-    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG+1):nrow(data.CG)),]
-  }
-
-  data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim[[GR]] <- as.factor(data.trim[[GR]])
 
   TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
   CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)

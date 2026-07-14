@@ -14,6 +14,67 @@
 # to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally distributed
 # outcomes.
 
+# Internal helper shared by tm() and tm_bias(): validates the inputs, splits the
+# data into comparator (CG) and treatment (TG) groups, computes the dropout
+# proportions, resolves the trimming fraction, and trims each group.
+trim_data <- function(formula, GR, trF, side, data){
+
+  vn <- all.vars(formula)
+
+  if(!(GR %in% vn)){stop("TR variable not in data")}
+  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
+  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
+
+  TR <- as.factor(data[,GR])
+  CG <- levels(TR)[1]
+  TG <- levels(TR)[2]
+
+  data.CG <- data[which(data[,GR]==CG),]
+  data.TG <- data[which(data[,GR]==TG),]
+
+  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
+  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
+
+  drop <- max(CG.drop,TG.drop)
+
+  if(is.null(trF)){
+    trF <- drop
+    if(drop==0){
+      trF=0.5
+    }
+  } else {
+    if (!is.numeric(trF) || length(trF)!=1 || trF<=0 || trF>=1){ stop("trF must be a single number greater than 0 and less than 1")}
+    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
+  }
+
+  rems.TG <- ceiling(nrow(data.TG)*trF)
+  rems.CG <- ceiling(nrow(data.CG)*trF)
+
+  if(side=="LOW"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-(1:rems.TG),]
+    data.CGtrim <- data.CG[-(1:rems.CG),]
+  }
+
+  if(side=="HIGH"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG+1):nrow(data.TG)),]
+    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG+1):nrow(data.CG)),]
+  }
+
+  data.trim <- rbind(data.TGtrim,data.CGtrim)
+  data.trim[[GR]] <- as.factor(data.trim[[GR]])
+
+  list(vn=vn, TR=TR, CG=CG, TG=TG, CG.drop=CG.drop, TG.drop=TG.drop, trF=trF,
+       data.TGtrim=data.TGtrim, data.CGtrim=data.CGtrim, data.trim=data.trim)
+}
+
 #' @name tm
 #' @title Fitting Trimmed Mean Linear Models:
 #'
@@ -81,58 +142,17 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   side <- match.arg(side)
 
-  vn <- all.vars(formula)
-
-  if(!(GR %in% vn)){stop("TR variable not in data")}
-  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
-
-  TR <- as.factor(data[,GR])
-  CG <- levels(TR)[1]
-  TG <- levels(TR)[2]
-
-  data.CG <- data[which(data[,GR]==CG),]
-  data.TG <- data[which(data[,GR]==TG),]
-
-  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
-  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
-
-  drop <- max(CG.drop,TG.drop)
-
-  if(is.null(trF)){
-    trF <- drop
-    if(drop==0){
-      trF=0.5
-    }
-  } else {
-    if (!is.numeric(trF) || length(trF)!=1 || trF<=0 || trF>=1){ stop("trF must be a single number greater than 0 and less than 1")}
-    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
-  }
-
-  rems.TG <- ceiling(nrow(data.TG)*trF)
-  rems.CG <- ceiling(nrow(data.CG)*trF)
-
-  if(side=="LOW"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-(1:rems.TG),]
-    data.CGtrim <- data.CG[-(1:rems.CG),]
-  }
-
-
-  if(side=="HIGH"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG+1):nrow(data.TG)),]
-    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG+1):nrow(data.CG)),]
-  }
-
-  data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim[[GR]] <- as.factor(data.trim[[GR]])
+  td <- trim_data(formula, GR, trF, side, data)
+  vn <- td$vn
+  TR <- td$TR
+  CG <- td$CG
+  TG <- td$TG
+  CG.drop <- td$CG.drop
+  TG.drop <- td$TG.drop
+  trF <- td$trF
+  data.TGtrim <- td$data.TGtrim
+  data.CGtrim <- td$data.CGtrim
+  data.trim <- td$data.trim
 
   perm.func <- function(data.trim, var, n_perm){
 
