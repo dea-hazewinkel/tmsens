@@ -86,6 +86,7 @@
 #' \item{max_bias_TG}{an array of bias components, total bias, the bias adjusted estimate, and inferred full sample
 #' group standard deviations, calculated under the assumption of worst-case scenario dropout, with dropout in the treatment group (TG) on the opposite
 #' side of the distribution from the one that is being trimmed}
+#' \item{groups}{a named vector giving the values of the treatment variable that define the treatment (TG) and comparator (CG) groups}
 #' @examples
 #' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
 #'   c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
@@ -418,6 +419,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   out_fin$inferred_CG_SD <- infSDCG
   out_fin$max_bias_CG <- maximum_bias_CG
   out_fin$max_bias_TG <- maximum_bias_TG
+  out_fin$groups <- c(TG = TG, CG = CG)
 
 
   class(out_fin) <- "tm_bias"
@@ -486,18 +488,16 @@ print.tm_bias <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
   cat("\n")
 
-  max.bias.CG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the",
-                             substr(x$analysis_details[4,], (nchar(x$analysis_details[4,])-1)-10,
-                                    (nchar(x$analysis_details[4,]))), sep=" ")
+  max.bias.CG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the CG group (",
+                             x$groups[["CG"]], "):\n", sep="")
 
   cat(max.bias.CG.title)
   print.default(format(x$max_bias_CG, digits=digits), quote=FALSE)
 
   cat("\n")
 
-  max.bias.TG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the",
-                             substr(x$analysis_details[3,], (nchar(x$analysis_details[3,])-1)-11,
-                                    (nchar(x$analysis_details[3,])-1)), sep=" ")
+  max.bias.TG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the TG group (",
+                             x$groups[["TG"]], "):\n", sep="")
   cat(max.bias.TG.title)
   print.default(format(x$max_bias_TG, digits=digits), quote=FALSE)
 
