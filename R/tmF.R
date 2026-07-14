@@ -128,7 +128,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
   }
 
   data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim$TR <- as.factor(data.trim$TR)
+  data.trim[[GR]] <- as.factor(data.trim[[GR]])
 
   perm.func <- function(data.trim, var, n_perm){
 
@@ -195,7 +195,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     x6 <- x5[seq_along(x1)]
     dat.resc[,vn[1]] <- x6
     dat.trim.resc <- rbind(dat.resc,dat.oth)
-    dat.trim.resc$TR <- as.factor(dat.trim.resc$TR)
+    dat.trim.resc[[GR]] <- as.factor(dat.trim.resc[[GR]])
     perm.out.TR.adj <- t(data.frame(perm.func(dat.trim.resc, GR, n_perm)))
     rownames(perm.out.TR.adj) <- paste(GR, "adj", sep="")
 

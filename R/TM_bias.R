@@ -162,7 +162,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   }
 
   data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim$TR <- as.factor(data.trim$TR)
+  data.trim[[GR]] <- as.factor(data.trim[[GR]])
 
   TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
   CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
