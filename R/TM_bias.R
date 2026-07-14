@@ -112,8 +112,8 @@ tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max
   if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
 
   TR <- as.factor(data[,GR])
-  CG <- sort(levels(TR))[1]
-  TG <- sort(levels(TR))[2]
+  CG <- levels(TR)[1]
+  TG <- levels(TR)[2]
 
   data.CG <- data[which(data[,GR]==CG),]
   data.TG <- data[which(data[,GR]==TG),]
