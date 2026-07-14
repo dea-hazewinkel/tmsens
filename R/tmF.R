@@ -312,7 +312,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' @param object an object of class "\code{tm}"
 #' @param ... user specified arguments
 #'
-#' @return \code{summary.tm} returns an list of summary statistics of the fitted trimmed means linear
+#' @return \code{summary.tm} returns a list of summary statistics of the fitted trimmed means linear
 #' model in \code{object}, with components
 #' \item{call}{the matched call}
 #' \item{n}{the number of observations per treatment group}
