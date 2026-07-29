@@ -2,12 +2,12 @@
 % Please edit documentation in R/TM_bias.R
 \name{tm_bias}
 \alias{tm_bias}
-\title{Calculating Bias For Trimmed Mean Linear Models:}
+\title{Calculating Bias For Trimmed Mean Linear Models}
 \usage{
 tm_bias(
   formula,
   GR,
-  trF,
+  trF = NULL,
   side = c("LOW", "HIGH"),
   spread_TG = "max_bias",
   spread_CG = "max_bias",
@@ -24,9 +24,10 @@ lowest value to be the comparator/reference group}
 
 \item{trF}{a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 for each treatment group. \code{trF} should be equal to or greater than the largest observed
-dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.}
+dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+or a trimming fraction of 0.5 if there is no dropout.}
 
-\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed.}
+\item{side}{specifies if higher value trimming (\code{"HIGH"}) or lower value trimming (\code{"LOW"}) should be performed. The default is \code{"LOW"}.}
 
 \item{spread_TG}{a number between 0 and 1, specifying the dropout spread for the treatment group.
 \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
@@ -50,7 +51,7 @@ An object of class "\code{tm_bias}" is a list containing the following component
 Strong MNAR bias in the treatment group (TG) and the comparator group (CG)}
 \item{total_bias}{the sum of all bias components}
 \item{TM_estimate}{the trimmed means estimate of the treatment effect}
-\item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate }
+\item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate}
 \item{analysis_details}{the user-specified trimming fraction, trimming side, and dropout spread in the
 treatment (TG) and comparator groups (CG)}
 \item{observed_TG_SD}{observed standard deviation of the treatment group (TG) outcome}
@@ -62,6 +63,7 @@ side of the distribution from the one that is being trimmed}
 \item{max_bias_TG}{an array of bias components, total bias, the bias adjusted estimate, and inferred full sample
 group standard deviations, calculated under the assumption of worst-case scenario dropout, with dropout in the treatment group (TG) on the opposite
 side of the distribution from the one that is being trimmed}
+\item{groups}{a named vector giving the values of the treatment variable that define the treatment (TG) and comparator (CG) groups}
 }
 \description{
 \code{tm_bias} calculates the bias and the bias-adjusted estimate for a trimmed means analysis (\code{\link{tm}}) of a given

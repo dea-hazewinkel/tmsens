@@ -1,8 +1,8 @@
-pandoc: '3.3'
-pkgdown: 2.1.0
+pandoc: '3.10'
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-08-29T13:43Z
+last_built: 2026-07-14T10:40Z
 urls:
   reference: https://dea-hazewinkel.github.io/tmsens/reference
   article: https://dea-hazewinkel.github.io/tmsens/articles

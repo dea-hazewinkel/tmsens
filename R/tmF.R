@@ -5,7 +5,7 @@
 #   but nothing smaller than the largest observed dropout proportion.
 # - If no trimming fraction is specified, and there is no dropout, then the default is 50% trimming
 # - Trimming side is user specified (LOWer value trimming or HIGHer value trimming)
-# - n_perm is the number of permutation to obtain p value/ 95% CI. Default value is 1000
+# - n_perm is the number of permutations to obtain the p-value / 95% CI. Default value is 1000
 # - The adjusted estimate can only be computed for 50% trimming. Default is no calculation of the adjusted
 # - estimate (adj_est=FALSE).
 # details. The trimmed means estimate is subject to two assumptions: the strong MNAR assumption
@@ -14,8 +14,69 @@
 # to be equal. The adjusted trimmed means estimator relaxes the latter, but assumes normally distributed
 # outcomes.
 
+# Internal helper shared by tm() and tm_bias(): validates the inputs, splits the
+# data into comparator (CG) and treatment (TG) groups, computes the dropout
+# proportions, resolves the trimming fraction, and trims each group.
+trim_data <- function(formula, GR, trF, side, data){
+
+  vn <- all.vars(formula)
+
+  if(!(GR %in% vn)){stop("TR variable not in data")}
+  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
+  if (length(stats::na.omit(unique(data[,GR])))!=2){ stop("TR non-binary")}
+
+  TR <- as.factor(data[,GR])
+  CG <- levels(TR)[1]
+  TG <- levels(TR)[2]
+
+  data.CG <- data[which(data[,GR]==CG),]
+  data.TG <- data[which(data[,GR]==TG),]
+
+  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
+  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
+
+  drop <- max(CG.drop,TG.drop)
+
+  if(is.null(trF)){
+    trF <- drop
+    if(drop==0){
+      trF=0.5
+    }
+  } else {
+    if (!is.numeric(trF) || length(trF)!=1 || trF<=0 || trF>=1){ stop("trF must be a single number greater than 0 and less than 1")}
+    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
+  }
+
+  rems.TG <- ceiling(nrow(data.TG)*trF)
+  rems.CG <- ceiling(nrow(data.CG)*trF)
+
+  if(side=="LOW"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-(1:rems.TG),]
+    data.CGtrim <- data.CG[-(1:rems.CG),]
+  }
+
+  if(side=="HIGH"){
+    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
+    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
+    data.CG <- data.CG[order(data.CG[,vn[1]]),]
+    data.TG <- data.TG[order(data.TG[,vn[1]]),]
+    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG+1):nrow(data.TG)),]
+    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG+1):nrow(data.CG)),]
+  }
+
+  data.trim <- rbind(data.TGtrim,data.CGtrim)
+  data.trim[[GR]] <- as.factor(data.trim[[GR]])
+
+  list(vn=vn, TR=TR, CG=CG, TG=TG, CG.drop=CG.drop, TG.drop=TG.drop, trF=trF,
+       data.TGtrim=data.TGtrim, data.CGtrim=data.CGtrim, data.trim=data.trim)
+}
+
 #' @name tm
-#' @title Fitting Trimmed Mean Linear Models:
+#' @title Fitting Trimmed Mean Linear Models
 #'
 #' @description \code{tm} performs a trimmed means analysis for data with a continuous outcome/response and a binary
 #' treatment/exposure variable. Outcomes are sorted and trimmed per treatment group, and a linear
@@ -28,8 +89,9 @@
 #' lowest value to be the comparator/reference group
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
-#' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
-#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed.
+#' dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+#' or a trimming fraction of 0.5 if there is no dropout.
+#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed. The default is `"LOW"`.
 #' @param n_perm the number of permutations performed to obtain the p-value and 95% confidence intervals
 #' for the estimates. Default is 1000.
 #' @param adj_est logical. If \code{TRUE} the adjusted trimmed means estimate is computed. The default is `FALSE`.
@@ -57,7 +119,7 @@
 #' \item{trimside}{specifies if lower or higher value trimming was performed}
 #' \item{n_after_trimming}{the number of observations per treatment group after trimming}
 #' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
-#' \item{Analysis_details}{reiterates trimming fraction and side, and, for adjest=TRUE specifies if the adjustment was performed on the comparator or treatment group.}
+#' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adj_est=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #' @examples
@@ -78,77 +140,40 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   cl <- match.call()
 
-  vn <- all.vars(formula)
+  side <- match.arg(side)
 
-  if(!(GR %in% vn)){stop("TR variable not in data")}
-  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
-
-  TR <- as.factor(data[,GR])
-  CG <- sort(levels(TR))[1]
-  TG <- sort(levels(TR))[2]
-
-  data.CG <- data[which(data[,GR]==CG),]
-  data.TG <- data[which(data[,GR]==TG),]
-
-  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
-  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
-
-  drop <- max(CG.drop,TG.drop)
-
-  if(is.null(trF)){
-    trF <- drop
-    if(drop==0){
-      trF=0.5
-    }
-  } else {
-    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
-  }
-
-  rems.TG <- ceiling(nrow(data.TG)*trF)
-  rems.CG <- ceiling(nrow(data.CG)*trF)
-
-  if(side=="LOW"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-(1:rems.TG),]
-    data.CGtrim <- data.CG[-(1:rems.CG),]
-  }
-
-
-  if(side=="HIGH"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG):nrow(data.TG)),]
-    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG):nrow(data.CG)),]
-  }
-
-  data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim$TR <- as.factor(data.trim$TR)
+  td <- trim_data(formula, GR, trF, side, data)
+  vn <- td$vn
+  TR <- td$TR
+  CG <- td$CG
+  TG <- td$TG
+  CG.drop <- td$CG.drop
+  TG.drop <- td$TG.drop
+  trF <- td$trF
+  data.TGtrim <- td$data.TGtrim
+  data.CGtrim <- td$data.CGtrim
+  data.trim <- td$data.trim
 
   perm.func <- function(data.trim, var, n_perm){
 
-    perm.f <- function(data.trim, var){
-      new.tr <- sample(data.trim[,var], replace=FALSE)
-      data.trim.perm <- data.trim
-      data.trim.perm[,var] <- new.tr
-      if(var==GR){
-        var1 <- paste(var, TG, sep="")
-      } else {var1 <- var}
-      perm.est <- summary(stats::lm(formula, data=data.trim.perm))$coefficients[var1,1]
-      return(perm.est)}
+    mf <- stats::model.frame(formula, data=data.trim)
+    Y.mm <- stats::model.response(mf)
+    X.mm <- stats::model.matrix(formula, mf)
 
-    perm.testing <- replicate(n_perm, perm.f(data.trim, var))
-    lm.obj <- stats::lm(formula,data.trim)
     if(var==GR){
       var1 <- paste(var, TG, sep="")
     } else {var1 <- var}
-    beta_t <- summary(lm.obj)$coefficients[var1,1]
-    Pval <- (length(perm.testing)-sum(beta_t>perm.testing))/length(perm.testing)
+    cols <- which(attr(X.mm, "assign") == match(var, attr(stats::terms(mf), "term.labels")))
+
+    perm.f <- function(){
+      X.perm <- X.mm
+      X.perm[,cols] <- X.mm[sample(nrow(X.mm), replace=FALSE),cols]
+      stats::lm.fit(X.perm, Y.mm)$coefficients[[var1]]
+    }
+
+    perm.testing <- replicate(n_perm, perm.f())
+    beta_t <- stats::lm.fit(X.mm, Y.mm)$coefficients[[var1]]
+    Pval <- (sum(abs(perm.testing)>=abs(beta_t))+1)/(length(perm.testing)+1)
     sd.perm <- stats::sd(perm.testing)
     conf.int <- c(beta_t-sd.perm*1.96, beta_t+sd.perm*1.96)
     out <- c(beta_t, Pval, conf.int)
@@ -185,7 +210,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     if (side=="LOW"){
       x2 <- min(x1) - (abs((min(x1)-x1)))}
     if (side=="HIGH"){
-      x2 <- min(x1) + (abs((min(x1)+x1)))}
+      x2 <- max(x1) + (abs((max(x1)-x1)))}
 
     x3a <- c(x1,x2)
     x3 <- x3a - mean(x3a)
@@ -195,15 +220,12 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
     x6 <- x5[seq_along(x1)]
     dat.resc[,vn[1]] <- x6
     dat.trim.resc <- rbind(dat.resc,dat.oth)
-    dat.trim.resc$TR <- as.factor(dat.trim.resc$TR)
+    dat.trim.resc[[GR]] <- as.factor(dat.trim.resc[[GR]])
     perm.out.TR.adj <- t(data.frame(perm.func(dat.trim.resc, GR, n_perm)))
     rownames(perm.out.TR.adj) <- paste(GR, "adj", sep="")
 
-  } else {
-    proc <- NA
   }
 
-  stats::sd(c(rep(NA,10), stats::rnorm(100,0,1)))
   sdY.trim <- c(stats::sd(data.TGtrim[,vn[1]]),stats::sd(data.CGtrim[,vn[1]]))
   sdY.obs <- c(stats::sd(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE),stats::sd(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE))
   sd_tab <- t(matrix(c(sdY.obs,sdY.trim), nrow=2, ncol=2))
@@ -217,7 +239,7 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
 
   names(trF) <- "trimming fraction"
 
-  n_tot <- t(matrix(c(sum(TR==TG),sum(TR==CG))))
+  n_tot <- t(matrix(c(sum(TR==TG, na.rm=TRUE),sum(TR==CG, na.rm=TRUE))))
   rownames(n_tot) <- c("N")
   colnames(n_tot) <- c(TG,CG)
 
@@ -234,9 +256,13 @@ tm <- function(formula, GR, trF=NULL, side=c("LOW","HIGH"), n_perm=1000, adj_est
   names(trimside) <- "trimming side"
 
   tp <- paste(paste(round(trF*100,1), "%", sep=""), trimside, sep=" ")
-  tp1 <- paste(as.character(proc), "for adjusted TM estimate", sep=" ")
-  an.det <- (matrix(c(tp, tp1), nrow=2,ncol=1))
-  rownames(an.det) <- c("", "")
+  if(adj_est==TRUE){
+    tp1 <- paste(proc, "for adjusted TM estimate", sep=" ")
+    an.det <- matrix(c(tp, tp1), nrow=2, ncol=1)
+  } else {
+    an.det <- matrix(tp, nrow=1, ncol=1)
+  }
+  rownames(an.det) <- rep("", nrow(an.det))
   colnames(an.det) <- c("Analysis details")
 
   final.out <- list()
@@ -279,14 +305,14 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
 
 #' @name summary.tm
-#' @title Summarizing Trimmed Means Linear Model fits:
+#' @title Summarizing Trimmed Means Linear Model Fits
 #'
 #' @description \code{summary} method for class "\code{tm}".
 #'
 #' @param object an object of class "\code{tm}"
 #' @param ... user specified arguments
 #'
-#' @return \code{summary.tm} returns an list of summary statistics of the fitted trimmed means linear
+#' @return \code{summary.tm} returns a list of summary statistics of the fitted trimmed means linear
 #' model in \code{object}, with components
 #' \item{call}{the matched call}
 #' \item{n}{the number of observations per treatment group}
@@ -295,7 +321,7 @@ print.tm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 #' \item{trimside}{specifies if lower or higher value trimming was performed}
 #' \item{n_after_trimming}{the number of observations per treatment group after trimming}
 #' \item{coefficients}{an array of coefficients with corresponding p-values and 95% confidence intervals}
-#' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adjest=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
+#' \item{Analysis_details}{reiterates trimming fraction and side, and, for `adj_est=TRUE` specifies if the adjustment was performed on the comparator or treatment group.}
 #' \item{SD_outcome}{an array of the standard deviation per treatment group, for the observed outcomes and for the trimmed outcomes}
 #'
 #' @seealso [`tm`]. The function [`coef`]
@@ -329,8 +355,10 @@ print.summary.tm <- function (x,
       paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
 
-  cat("\nAnalysis details:\n")
-  cat(x$`Analysis_details`[2], "\n\n", sep = "")
+  if (nrow(x$`Analysis_details`) > 1) {
+    cat("\nAnalysis details:\n")
+    cat(x$`Analysis_details`[2], "\n\n", sep = "")
+  }
 
   if (length(stats::coef(x))) {
     cat("Coefficients:\n")
@@ -341,10 +369,13 @@ print.summary.tm <- function (x,
   }
 
   cat("\n\nDropout:\n")
-  cat(format(x$dropout[[2]] * 100, digits = digits), "%", sep="")
+  dropout <- stats::setNames(paste(format(as.vector(x$dropout) * 100, digits = digits), "%", sep=""),
+                             colnames(x$dropout))
+  print.default(dropout, quote = FALSE, print.gap = 2L)
 
-  cat("\n\nSample size after trimming:\n")
-  cat(format(x$n_after_trimming[[1]], digits = digits))
+  cat("\nSample size after trimming:\n")
+  n_after <- stats::setNames(as.vector(x$n_after_trimming), colnames(x$n_after_trimming))
+  print.default(n_after, print.gap = 2L)
 
   cat("\n\nTrimming fraction: \n",
       format(x$trimfrac*100, digits = digits),

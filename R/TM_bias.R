@@ -15,7 +15,7 @@
 # dropout proportions and specified dropout spread, under the assumption of normality.
 
 #' @name tm_bias
-#' @title Calculating Bias For Trimmed Mean Linear Models:
+#' @title Calculating Bias For Trimmed Mean Linear Models
 #'
 #' @description \code{tm_bias} calculates the bias and the bias-adjusted estimate for a trimmed means analysis ([`tm`]) of a given
 #' dataset, for a user-specified trimming fraction and dropout spread. \code{tm_bias} calculates, under assumption
@@ -29,8 +29,9 @@
 #' lowest value to be the comparator/reference group
 #' @param trF a number between 0 and 1, specifying the trimming fraction: the proportion of the data that is trimmed away
 #' for each treatment group. \code{trF} should be equal to or greater than the largest observed
-#' dropout proportion. If left unspecified, a default trimming fraction of 0.5 is assumed.
-#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed.
+#' dropout proportion. If left unspecified, the largest observed dropout proportion is used,
+#' or a trimming fraction of 0.5 if there is no dropout.
+#' @param side specifies if higher value trimming (`"HIGH"`) or lower value trimming (`"LOW"`) should be performed. The default is `"LOW"`.
 #' @param spread_TG a number between 0 and 1, specifying the dropout spread for the treatment group.
 #' \code{spread_TG} should be equal to or greater than the observed dropout proportion. If left unspecified,
 #' the worst-case scenario is assumed, in which dropout is located on the side of the distribution opposite from the one
@@ -74,7 +75,7 @@
 #' Strong MNAR bias in the treatment group (TG) and the comparator group (CG)}
 #' \item{total_bias}{the sum of all bias components}
 #' \item{TM_estimate}{the trimmed means estimate of the treatment effect}
-#' \item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate }
+#' \item{bias_adj_TM_estimate}{the bias adjusted trimmed means estimate}
 #' \item{analysis_details}{the user-specified trimming fraction, trimming side, and dropout spread in the
 #' treatment (TG) and comparator groups (CG)}
 #' \item{observed_TG_SD}{observed standard deviation of the treatment group (TG) outcome}
@@ -86,6 +87,7 @@
 #' \item{max_bias_TG}{an array of bias components, total bias, the bias adjusted estimate, and inferred full sample
 #' group standard deviations, calculated under the assumption of worst-case scenario dropout, with dropout in the treatment group (TG) on the opposite
 #' side of the distribution from the one that is being trimmed}
+#' \item{groups}{a named vector giving the values of the treatment variable that define the treatment (TG) and comparator (CG) groups}
 #' @examples
 #' test_dat <- as.data.frame(cbind(c(rep(0, 500), rep(1, 500)),
 #'   c(sort(rnorm(500, 0, 1)), sort(rnorm(500, 1, 1.5)))))
@@ -97,25 +99,20 @@
 #'                        spread_CG = 0.6, data = test_dat)
 #' print(tm_bias_obj)
 #' @export
-tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
+tm_bias <- function(formula, GR, trF=NULL, side=c("LOW", "HIGH"), spread_TG="max_bias", spread_CG="max_bias",data){
 
   cl <- match.call()
 
-  vn <- all.vars(formula)
+  side <- match.arg(side)
 
-  if(!(GR %in% vn)){stop("TR variable not in data")}
-  if (is.numeric(data[,vn[1]])==FALSE){ stop("Y non-numeric")}
-  if (length(unique(data[,GR]))>2){ stop("TR non-binary")}
-
-  TR <- as.factor(data[,GR])
-  CG <- sort(levels(TR))[1]
-  TG <- sort(levels(TR))[2]
-
-  data.CG <- data[which(data[,GR]==CG),]
-  data.TG <- data[which(data[,GR]==TG),]
-
-  CG.drop <- sum(is.na(data.CG[,vn[1]]))/nrow(data.CG)
-  TG.drop <- sum(is.na(data.TG[,vn[1]]))/nrow(data.TG)
+  td <- trim_data(formula, GR, trF, side, data)
+  vn <- td$vn
+  CG <- td$CG
+  TG <- td$TG
+  CG.drop <- td$CG.drop
+  TG.drop <- td$TG.drop
+  trF <- td$trF
+  data.trim <- td$data.trim
 
   if (spread_TG==1){
     spread_TG <- 0.999
@@ -126,43 +123,6 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   if (spread_TG < TG.drop ){stop("Treatment Gr spread smaller than dropout proportion")}
   if (spread_CG < CG.drop ){stop("Comparator Gr spread smaller than dropout proportion")}
 
-
-  drop <- max(CG.drop,TG.drop)
-
-  if(is.null(trF)){
-    trF <- drop
-    if(drop==0){
-      trF=0.5
-    }
-  } else {
-    if (drop>trF){ stop("Trimming fraction smaller than largest dropout proportion")}
-  }
-
-  rems.TG <- ceiling(nrow(data.TG)*trF)
-  rems.CG <- ceiling(nrow(data.CG)*trF)
-
-  if(side=="LOW"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- -Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- -Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-(1:rems.TG),]
-    data.CGtrim <- data.CG[-(1:rems.CG),]
-  }
-
-
-  if(side=="HIGH"){
-    data.TG[is.na(data.TG[,vn[1]]),vn[1]] <- Inf
-    data.CG[is.na(data.CG[,vn[1]]),vn[1]] <- Inf
-    data.CG <- data.CG[order(data.CG[,vn[1]]),]
-    data.TG <- data.TG[order(data.TG[,vn[1]]),]
-    data.TGtrim <- data.TG[-((nrow(data.TG)-rems.TG):nrow(data.TG)),]
-    data.CGtrim <- data.CG[-((nrow(data.CG)-rems.CG):nrow(data.CG)),]
-  }
-
-  data.trim <- rbind(data.TGtrim,data.CGtrim)
-  data.trim$TR <- as.factor(data.trim$TR)
-
   TG_var <- stats::var(data[which(data[,GR]==TG),vn[1]], na.rm=TRUE)
   CG_var <- stats::var(data[which(data[,GR]==CG),vn[1]], na.rm=TRUE)
 
@@ -172,6 +132,9 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   colnames(beta_t) <- ""; rownames(beta_t) <- ""
 
   SD.func.extr <- function(spread, dr, obs.var){
+
+    # no dropout: the full sample is fully observed, so its SD is the observed SD
+    if (spread==0){ return(sqrt(obs.var)) }
 
     c <- spread
     fr1 <- (c-dr)/(1-dr)
@@ -212,12 +175,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
     if (DSP <= trimf){
       calc.frac <- 0
     }
-    calc.frac
 
-    b.prop <- 1-trimf
-    c.prop <- DS
-
-    bst.prop <- DS+calc.frac
     a <- stats::qnorm(DS+calc.frac,0,1)
     b <- stats::qnorm(DS,0,1)
     a1 <- stats::qnorm(1-trimf,0,1)
@@ -306,13 +264,13 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   bias.max <- function(SD, dr, trF, viol.group, side){
 
     if(side=="LOW" && viol.group=="CG"){
-      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))+stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="LOW" && viol.group=="TG"){
-      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))+stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" && viol.group=="CG"){
-      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
+      bias <- -SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))+stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
     if(side=="HIGH" && viol.group=="TG"){
-      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))--stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
+      bias <- SD/(1-dr)* (stats::dnorm(stats::qnorm(trF))+stats::dnorm(stats::qnorm(1-dr))-stats::dnorm(stats::qnorm(1-dr-(1-trF))))}
 
     return(bias)
   }
@@ -418,6 +376,7 @@ tm_bias <- function(formula, GR, trF, side=c("LOW", "HIGH"), spread_TG="max_bias
   out_fin$inferred_CG_SD <- infSDCG
   out_fin$max_bias_CG <- maximum_bias_CG
   out_fin$max_bias_TG <- maximum_bias_TG
+  out_fin$groups <- c(TG = TG, CG = CG)
 
 
   class(out_fin) <- "tm_bias"
@@ -486,18 +445,16 @@ print.tm_bias <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
 
   cat("\n")
 
-  max.bias.CG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the",
-                             substr(x$analysis_details[4,], (nchar(x$analysis_details[4,])-1)-10,
-                                    (nchar(x$analysis_details[4,]))), sep=" ")
+  max.bias.CG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the CG group (",
+                             x$groups[["CG"]], "):\n", sep="")
 
   cat(max.bias.CG.title)
   print.default(format(x$max_bias_CG, digits=digits), quote=FALSE)
 
   cat("\n")
 
-  max.bias.TG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the",
-                             substr(x$analysis_details[3,], (nchar(x$analysis_details[3,])-1)-11,
-                                    (nchar(x$analysis_details[3,])-1)), sep=" ")
+  max.bias.TG.title <- paste("Bias under maximal violation of the strong MNAR assumption in the TG group (",
+                             x$groups[["TG"]], "):\n", sep="")
   cat(max.bias.TG.title)
   print.default(format(x$max_bias_TG, digits=digits), quote=FALSE)
 
